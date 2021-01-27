@@ -5,47 +5,16 @@
     "tasks": [
         {
             "label": "watch",
+            "type": "npm",
+            "script": "webpack:dev",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "dependsOn": ["watch:tsc", "watch:rollup"]
-        },
-        {
-            "label": "watch:tsc",
-            "type": "npm",
-            "script": "watch:tsc",
-            "problemMatcher": "$tsc-watch",
-            "isBackground": true,
+            "problemMatcher": ["$ts-webpack"],
             "presentation": {
                 "reveal": "never"
-            },
-            "group": "build"
-        },
-        {
-            "label": "watch:rollup",
-            "type": "npm",
-            "script": "watch:rollup",
-            "isBackground": true,
-            "problemMatcher": {
-                "pattern": [
-                    {
-                        "regexp": "^.*waiting for changes...$",
-                        "file": 1,
-                        "location": 2,
-                        "message": 3
-                    }
-                ],
-                "background": {
-                    "activeOnStart": true,
-                    "beginsPattern": "^bundles .*$",
-                    "endsPattern": "^.*waiting for changes...$"
-                }
-            },
-            "presentation": {
-                "reveal": "never"
-            },
-            "group": "build"
+            }
         }
     ]
 }
