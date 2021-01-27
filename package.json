@@ -25,8 +25,8 @@
                     "crumbs.sharkd": {
                         "type": "string",
                         "default": "sharkd",
-                        "description": "Path to the sharkd binary.",
-                        "scope": "resource"
+                        "description": "The path to the sharkd binary.",
+                        "scope": "machine"
                     },
                     "crumbs.editor.columns": {
                         "type": "array",
@@ -60,6 +60,7 @@
                                 "type": 28
                             }
                         ],
+                        "description": "The columns to be displayed in the editor.",
                         "items": {
                             "type": "object",
                             "properties": {
@@ -90,7 +91,14 @@
                                     "description": "Which occurence of a filed should be used. Can be left out most of the time."
                                 }
                             }
-                        }
+                        },
+                        "scope": "resource"
+                    },
+                    "crumbs.editor.chunkSize": {
+                        "type": "integer",
+                        "default": 1000,
+                        "description": "To minimise performance problems and provide information as quickly as possible, Crumbs divides packets into many chunks.",
+                        "scope": "resource"
                     }
                 }
             }

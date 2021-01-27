@@ -15,6 +15,7 @@ class Editor {
             },
             rowSelection: "multiple",
             suppressLoadingOverlay: true,
+            suppressColumnVirtualisation: true,
         };
 
         new Grid(gridDiv, gridOptions);

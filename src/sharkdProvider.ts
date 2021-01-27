@@ -23,7 +23,6 @@ export default class SharkdProvider {
         this.socket = new Promise<net.Socket>((resolve) => {
             const socket = new net.Socket();
 
-            socket.setMaxListeners(1000);
             socket.connect(socketURL.pathname);
 
             socket.on("error", () => socket.connect(socketURL.pathname));
@@ -36,7 +35,8 @@ export default class SharkdProvider {
             const releaseRequestMutex = await this.requestMutex.acquire();
             try {
                 (await this.socket).write(request);
-                (await this.socket).pipe(ndjson.parse()).once("data", (response) => {
+                (await this.socket).pipe(ndjson.parse()).once("data", async (response) => {
+                    (await this.socket).removeAllListeners();
                     releaseRequestMutex();
                     resolve(response);
                 });

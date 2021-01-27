@@ -44,7 +44,7 @@ export default class CrumbsEditor {
         }
     }
 
-    private async rowLoop(skip: number, limit: number, timeout: number = 1) {
+    private async rowLoop(skip: number, limit: number = 1000, timeout: number = 1) {
         const rows = await this.document.sharkd.getRows(skip, limit);
 
         timeout = <number>min([timeout * 2, 4096]);
@@ -55,7 +55,10 @@ export default class CrumbsEditor {
             skip += rows.length;
         }
 
-        setTimeout(() => this.rowLoop(skip, limit, timeout), timeout);
+        setTimeout(
+            () => this.rowLoop(skip, vscode.workspace.getConfiguration("crumbs").get("editor.chunkSize"), timeout),
+            timeout,
+        );
     }
 
     postMessage<MessageType>(message: MessageType) {
