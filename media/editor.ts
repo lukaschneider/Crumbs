@@ -1,4 +1,4 @@
-import { ColDef, ColumnApi, Grid, GridApi, GridOptions, RowNode } from "ag-grid-community";
+import { ColDef, ColumnApi, Grid, GridApi, GridOptions } from "ag-grid-community";
 import { zipObject } from "lodash";
 
 class Editor {
@@ -9,11 +9,13 @@ class Editor {
     constructor() {
         const gridDiv = <HTMLElement>document.querySelector("#grid");
         const gridOptions: GridOptions = {
-            defaultColDef: { resizable: true, sortable: true },
-            getRowStyle: (row: RowNode) => {
-                return { background: row.data.bg, color: row.data.fg };
+            defaultColDef: {
+                resizable: true,
+                sortable: true,
+                lockPinned: true,
             },
-            rowSelection: "multiple",
+            rowHeight: 30,
+            headerHeight: 35,
             suppressLoadingOverlay: true,
             suppressColumnVirtualisation: true,
         };

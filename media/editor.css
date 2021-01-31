@@ -5,6 +5,86 @@ body,
     padding: 0;
     height: 100%;
     width: 100%;
+}
 
+.ag-theme-alpine .ag-root-wrapper {
+    background-color: var(--vscode-editor-background);
+
+    border: none;
+}
+
+.ag-theme-alpine .ag-icon {
+    color: var(--vscode-editor-foreground);
+}
+
+.ag-theme-alpine .ag-header-icon {
+    color: var(--vscode-editor-foreground);
+}
+
+.ag-theme-alpine .ag-header {
+    background-color: var(--vscode-editor-background);
+
+    border-color: var(--vscode-editor-lineHighlightBorder);
+}
+
+.ag-theme-alpine .ag-header-row {
+    font-family: var(--vscode-font-family);
+    font-size: var(--vscode-font-size);
+    line-height: 35px;
+
+    color: var(--vscode-editor-foreground);
+}
+
+.ag-theme-alpine .ag-header-cell-resize:after {
+    background-color: var(--vscode-textSeparator-foreground);
+
+    width: 3px;
+    left: calc(50% - 1.5px);
+}
+
+.ag-theme-alpine .ag-header-cell {
+    background-color: transparent !important;
+}
+
+.ag-theme-alpine .ag-header-cell:after {
+    border-color: var(--vscode-focusBorder) !important;
+}
+
+.ag-theme-alpine .ag-row {
     font-family: var(--vscode-editor-font-family);
+    font-size: var(--vscode-editor-font-size);
+
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+
+    border-color: var(--vscode-editor-lineHighlightBorder);
+}
+
+.ag-theme-alpine .ag-row.ag-row-hover,
+.ag-row.ag-row-focus {
+    background-color: var(--vscode-editor-lineHighlightBackground) !important;
+    color: var(--vscode-editor-foreground) !important;
+}
+
+.ag-theme-alpine .ag-cell {
+    line-height: 30px;
+}
+
+.ag-theme-alpine .ag-ltr .ag-has-focus .ag-cell-focus:not(.ag-cell-range-selected) {
+    border-color: var(--vscode-focusBorder);
+}
+
+.ag-theme-alpine .ag-row-selected {
+    background-color: var(--vscode-editor-selectionBackground) !important;
+    color: var(--vscode-editor-selectionForeground, var(--vscode-editor-foreground)) !important;
+}
+
+.ag-theme-alpine.ag-dnd-ghost {
+    background-color: var(--vscode-editorSuggestWidget-background);
+    color: var(--vscode-editorSuggestWidget-foreground);
+
+    border-color: var(--vscode-editorSuggestWidget-border);
+    border-radius: 0;
+
+    box-shadow: none;
 }
