@@ -62,21 +62,21 @@ body,
 
 .ag-theme-alpine .ag-row.ag-row-hover,
 .ag-row.ag-row-focus {
-    background-color: var(--vscode-editor-lineHighlightBackground) !important;
-    color: var(--vscode-editor-foreground) !important;
+    background-color: var(--vscode-editor-hoverHighlightBackground);
+    color: var(--vscode-editor-foreground);
+}
+
+.ag-theme-alpine .ag-row-selected {
+    background-color: var(--vscode-editor-selectionBackground) !important;
+    color: var(--vscode-editor-selectionForeground, var(--vscode-editor-foreground)) !important;
 }
 
 .ag-theme-alpine .ag-cell {
     line-height: 30px;
 }
 
-.ag-theme-alpine .ag-ltr .ag-has-focus .ag-cell-focus:not(.ag-cell-range-selected) {
-    border-color: var(--vscode-focusBorder);
-}
-
-.ag-theme-alpine .ag-row-selected {
-    background-color: var(--vscode-editor-selectionBackground) !important;
-    color: var(--vscode-editor-selectionForeground, var(--vscode-editor-foreground)) !important;
+.ag-theme-alpine .ag-has-focus .ag-cell.ag-cell-focus {
+    border-color: var(--vscode-focusBorder) !important;
 }
 
 .ag-theme-alpine.ag-dnd-ghost {

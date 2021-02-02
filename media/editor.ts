@@ -16,6 +16,7 @@ class Editor {
             },
             rowHeight: 30,
             headerHeight: 35,
+            rowSelection: "multiple",
             suppressLoadingOverlay: true,
             suppressColumnVirtualisation: true,
         };
