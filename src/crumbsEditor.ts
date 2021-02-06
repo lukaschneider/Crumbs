@@ -9,6 +9,9 @@ export default class CrumbsEditor {
     private document: CrumbsDocument;
     private webviewPanel: vscode.WebviewPanel;
 
+    static readonly onFocusFrameTree = new vscode.EventEmitter<void>();
+    static readonly onSetFrameTree = new vscode.EventEmitter<SharkdTreeNode[]>();
+
     constructor(webviewPanel: vscode.WebviewPanel, document: CrumbsDocument, context: vscode.ExtensionContext) {
         this.webviewPanel = webviewPanel;
         this.document = document;
@@ -38,9 +41,17 @@ export default class CrumbsEditor {
                 });
                 this.postMessage<EditorSetRowsMessage>({
                     type: "setRows",
-                    body: await this.document.sharkd.getRows(0, 100),
+                    rows: await this.document.sharkd.getRows(0, 100),
                 });
                 this.rowLoop(100, 1000);
+                break;
+            case "setFrameTree":
+                const frame = await this.document.sharkd.getFrame((message as WebviewSetFrameTreeMessage).frameNumber);
+                CrumbsEditor.onSetFrameTree.fire(frame.tree);
+                break;
+            case "focusFrameTree":
+                CrumbsEditor.onFocusFrameTree.fire();
+                break;
         }
     }
 
@@ -50,7 +61,7 @@ export default class CrumbsEditor {
         timeout = <number>min([timeout * 2, 4096]);
 
         if (rows.length !== 0) {
-            this.postMessage<EditorAppendRowsMessage>({ type: "appendRows", body: rows });
+            this.postMessage<EditorAppendRowsMessage>({ type: "appendRows", rows });
             timeout = 1;
             skip += rows.length;
         }

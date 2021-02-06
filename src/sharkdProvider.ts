@@ -70,4 +70,8 @@ export default class SharkdProvider {
         const response = await this.request<SharkdError>(`{"req": "load", "file": "${path}"}\n`);
         return response.err === 0;
     }
+
+    async getFrame(frameNumber: number) {
+        return this.request<SharkdFrame>(`{"req": "frame", "frame": ${frameNumber}, "proto": 1}\n`);
+    }
 }

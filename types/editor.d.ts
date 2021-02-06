@@ -1,25 +1,37 @@
 /* Messages from the Webview to the Editor */
 interface WebviewMessage {
-    type: "ready";
-    body?: any;
+    type: "ready" | "setFrameTree" | "focusFrameTree";
 }
 
-interface WebviewReadyMessage extends WebviewMessage {}
+interface WebviewReadyMessage extends WebviewMessage {
+    type: "ready";
+}
+
+interface WebviewSetFrameTreeMessage extends WebviewMessage {
+    type: "setFrameTree";
+    frameNumber: number;
+}
+
+interface WebviewfocusFrameTreeMessage extends WebviewMessage {
+    type: "focusFrameTree"
+}
 
 /* Messages from the Editor to the Webview */
 interface EditorMessage {
     type: "setColumns" | "appendRows" | "setRows";
-    body?: any;
 }
 
 interface EditorSetColumnsMessage extends EditorMessage {
+    type: "setColumns",
     body?: CrumbsConfigColumn[];
 }
 
 interface EditorAppendRowsMessage extends EditorMessage {
-    body: SharkdRow[];
+    type: "appendRows";
+    rows: SharkdRow[];
 }
 
 interface EditorSetRowsMessage extends EditorMessage {
-    body: SharkdRow[];
+    type: "setRows";
+    rows: SharkdRow[];
 }

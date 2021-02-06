@@ -1,4 +1,4 @@
-import { ColDef, ColumnApi, Grid, GridApi, GridOptions } from "ag-grid-community";
+import { ColDef, ColumnApi, Grid, GridApi, GridOptions, RowClickedEvent } from "ag-grid-community";
 import { zipObject } from "lodash";
 
 class Editor {
@@ -19,6 +19,8 @@ class Editor {
             rowSelection: "multiple",
             suppressLoadingOverlay: true,
             suppressColumnVirtualisation: true,
+            onRowClicked: this.onRowClicked.bind(this),
+            onRowDoubleClicked: this.onRowDoubleClicked.bind(this),
         };
 
         new Grid(gridDiv, gridOptions);
@@ -30,7 +32,7 @@ class Editor {
 
         // @ts-ignore
         this.vscode = acquireVsCodeApi();
-        this.vscode.postMessage({ type: "ready" });
+        this.postMessage<WebviewReadyMessage>({ type: "ready" });
     }
 
     private onMessage({ data }: { data: EditorMessage }) {
@@ -39,13 +41,25 @@ class Editor {
                 this.api.setColumnDefs(this.createColumnDefs((data as EditorSetColumnsMessage).body));
                 break;
             case "appendRows":
-                this.appendRows((data as EditorAppendRowsMessage).body);
+                this.appendRows((data as EditorAppendRowsMessage).rows);
                 break;
             case "setRows":
-                this.api.setRowData(this.rowsToRowNodes((data as EditorSetRowsMessage).body));
+                this.api.setRowData(this.rowsToRowNodes((data as EditorSetRowsMessage).rows));
                 this.columnApi.autoSizeAllColumns();
                 break;
         }
+    }
+
+    private postMessage<MessageType>(message: MessageType) {
+        this.vscode.postMessage(message);
+    }
+
+    private onRowClicked(event: RowClickedEvent) {
+        this.postMessage<WebviewSetFrameTreeMessage>({ type: "setFrameTree", frameNumber: event.data.crumbsFrameNumber });
+    }
+
+    private onRowDoubleClicked() {
+        this.postMessage<WebviewfocusFrameTreeMessage>({ type: "focusFrameTree" });
     }
 
     private rowsToRowNodes(rows: SharkdRow[]) {
@@ -69,8 +83,8 @@ class Editor {
                 row.c.map((field: string) => tryCastToNumber(field)),
             );
 
-            rowNodeData.bg = `#${row.bg}`;
-            rowNodeData.fg = `#${row.fg}`;
+            // This field is used to set the Frame Tree View
+            rowNodeData.crumbsFrameNumber = row.num;
 
             return rowNodeData;
         });
