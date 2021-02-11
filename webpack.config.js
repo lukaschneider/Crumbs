@@ -1,6 +1,7 @@
 "use strict";
 
 const path = require("path");
+const CopyPlugin = require("copy-webpack-plugin");
 
 /**@type {import('webpack').Configuration}*/
 module.exports = [
@@ -24,7 +25,8 @@ module.exports = [
             rules: [
                 {
                     test: /\.ts$/,
-                    exclude: [/node_modules/, /media/],
+                    include: /(node_modules|src)/,
+                    exclude: [/media/],
                     use: [
                         {
                             loader: "ts-loader",
@@ -51,7 +53,7 @@ module.exports = [
             rules: [
                 {
                     test: /\.ts$/,
-                    exclude: [/node_modules/],
+                    include: /(node_modules|media)/,
                     use: [
                         {
                             loader: "ts-loader",
@@ -63,5 +65,13 @@ module.exports = [
                 },
             ],
         },
+        plugins: [
+            new CopyPlugin({
+                patterns: [
+                    {from: path.resolve(__dirname, "node_modules/ag-grid-community/dist/styles/ag-grid.min.css"), to: path.join(__dirname, "dist/ag-grid.min.css")},
+                    {from: path.resolve(__dirname, "node_modules/ag-grid-community/dist/styles/ag-theme-alpine.min.css"), to: path.join(__dirname, "dist/ag-theme-alpine.min.css")},
+                ]
+            })
+        ]
     },
 ];
