@@ -24,8 +24,8 @@ export default class CrumbsEditor {
 
         webviewPanel.webview.html = pug.renderFile(this.context.asAbsolutePath("media/editor.pug"), {
             css: getAbsoluteWebviewUri("media/editor.css"),
-            gridCss: getAbsoluteWebviewUri("node_modules/ag-grid-community/dist/styles/ag-grid.min.css"),
-            gridTheme: getAbsoluteWebviewUri("node_modules/ag-grid-community/dist/styles/ag-theme-alpine.min.css"),
+            gridCss: getAbsoluteWebviewUri("dist/ag-grid.min.css"),
+            gridTheme: getAbsoluteWebviewUri("dist/ag-theme-alpine.min.css"),
             script: getAbsoluteWebviewUri("dist/editor.js"),
         });
 

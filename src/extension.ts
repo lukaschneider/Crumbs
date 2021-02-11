@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 
 import CrumbsEditorProvider from "./crumbsEditorProvider";
-import CrumbsFrameTreeProvider from "./crumbsFrameTreeProvider";
+import CrumbsFrameTree from "./crumbsFrameTree";
 
 export function activate(context: vscode.ExtensionContext) {
     const crumbsEditorProvider = new CrumbsEditorProvider(context);
@@ -14,6 +14,5 @@ export function activate(context: vscode.ExtensionContext) {
         }),
     );
 
-    const crumbsFrameTreeProvider = new CrumbsFrameTreeProvider();
-    context.subscriptions.push(vscode.window.registerTreeDataProvider("crumbsFrameTree", crumbsFrameTreeProvider));
+    new CrumbsFrameTree();
 }

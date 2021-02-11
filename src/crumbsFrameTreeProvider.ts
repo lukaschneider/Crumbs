@@ -1,22 +1,18 @@
 import * as vscode from "vscode";
+
 import CrumbsEditor from "./crumbsEditor";
+import CrumbsFrameTreeItem from "./crumbsFrameTreeItem";
 
 export default class CrumbsFrameTreeProvider implements vscode.TreeDataProvider<CrumbsFrameTreeItem> {
-    private frameTree: SharkdTreeNode[];
+    private rootTreeItems?: CrumbsFrameTreeItem[];
 
     private _onDidChangeTreeData = new vscode.EventEmitter<void>();
     readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
     constructor() {
-        this.frameTree = [];
-
         CrumbsEditor.onSetFrameTree.event((frameTree: SharkdTreeNode[]) => {
-            this.frameTree = frameTree;
+            this.rootTreeItems = frameTree.map((node, index) => new CrumbsFrameTreeItem(node, index));
             this._onDidChangeTreeData.fire();
-        });
-
-        CrumbsEditor.onFocusFrameTree.event(() => {
-            console.debug("TreeView Focus not implemented."); // TODO: Implement
         });
     }
 
@@ -26,22 +22,17 @@ export default class CrumbsFrameTreeProvider implements vscode.TreeDataProvider<
 
     getChildren(item?: CrumbsFrameTreeItem): CrumbsFrameTreeItem[] {
         if (item) {
-            return item.nodes.map((node, index) => new CrumbsFrameTreeItem(node, index, item.id));
+            return item.nodes.map((node, index) => new CrumbsFrameTreeItem(node, index, item));
         } else {
-            return this.frameTree.map((node, index) => new CrumbsFrameTreeItem(node, index));
+            return this.rootTreeItems || [];
         }
     }
-}
 
-export class CrumbsFrameTreeItem extends vscode.TreeItem {
-    nodes: SharkdTreeNode[];
+    getParent(item: CrumbsFrameTreeItem): CrumbsFrameTreeItem | undefined {
+        return item.parent;
+    }
 
-    constructor(node: SharkdTreeNode, index: number, parentId: string = "root") {
-        super(
-            node.g ? `[${node.l}]` : node.l,
-            node.n ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
-        );
-        this.id = `${parentId}.${node.e}.${index}`;
-        this.nodes = node.n || [];
+    getRootTreeItems(): CrumbsFrameTreeItem[] {
+        return this.rootTreeItems || [];
     }
 }

@@ -1,4 +1,4 @@
-import { ColDef, ColumnApi, Grid, GridApi, GridOptions, RowClickedEvent } from "ag-grid-community";
+import { CellKeyPressEvent, ColDef, ColumnApi, Grid, GridApi, GridOptions, RowClickedEvent } from "ag-grid-community";
 import { zipObject } from "lodash";
 
 class Editor {
@@ -21,6 +21,7 @@ class Editor {
             suppressColumnVirtualisation: true,
             onRowClicked: this.onRowClicked.bind(this),
             onRowDoubleClicked: this.onRowDoubleClicked.bind(this),
+            onCellKeyPress: this.onCellKeyPress.bind(this),
         };
 
         new Grid(gridDiv, gridOptions);
@@ -60,6 +61,15 @@ class Editor {
 
     private onRowDoubleClicked() {
         this.postMessage<WebviewfocusFrameTreeMessage>({ type: "focusFrameTree" });
+    }
+
+    private onCellKeyPress(event: CellKeyPressEvent) {
+        const kEvent = <KeyboardEvent>event.event;
+        switch(kEvent.key) {
+            case "Enter":
+                this.postMessage<WebviewSetFrameTreeMessage>({ type: "setFrameTree", frameNumber: event.data.crumbsFrameNumber });
+                this.postMessage<WebviewfocusFrameTreeMessage>({ type: "focusFrameTree" });
+        }
     }
 
     private rowsToRowNodes(rows: SharkdRow[]) {
