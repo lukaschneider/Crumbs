@@ -5,11 +5,13 @@ import CrumbsEditor from "./crumbsEditor";
 
 export default class CrumbsEditorProvider implements vscode.CustomReadonlyEditorProvider {
     private context: vscode.ExtensionContext;
+    private activeEditors: number;
 
     static readonly viewType = "crumbs.editor";
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
+        this.activeEditors = 0;
     }
 
     openCustomDocument(uri: vscode.Uri): CrumbsDocument {
@@ -22,12 +24,20 @@ export default class CrumbsEditorProvider implements vscode.CustomReadonlyEditor
             async (progress) => {
                 return new Promise<void>(async (resolve, reject) => {
                     webviewPanel.onDidDispose(reject);
-                    progress.report({ message: "Importing Packets"});
+                    progress.report({ message: "Importing Packets" });
 
                     await document.sharkd.loadFile(document.uri.path);
                     progress.report({ increment: 69, message: "Finalizing" });
 
                     new CrumbsEditor(webviewPanel, document, this.context);
+                    this.activeEditors++;
+                    vscode.commands.executeCommand("setContext", "crumbs:activeEditors", this.activeEditors);
+
+                    webviewPanel.onDidDispose(() => {
+                        this.activeEditors--;
+                        vscode.commands.executeCommand("setContext", "crumbs:activeEditors", this.activeEditors);
+                    });
+
                     resolve();
                 });
             },

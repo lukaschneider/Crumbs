@@ -216,7 +216,8 @@
                 {
                     "id": "crumbsFrameTree",
                     "name": "Tree",
-                    "type": "tree"
+                    "type": "tree",
+                    "when": "crumbs:activeEditors > 0"
                 }
             ]
         }
