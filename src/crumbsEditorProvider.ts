@@ -12,6 +12,11 @@ export default class CrumbsEditorProvider implements vscode.CustomReadonlyEditor
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
         this.activeEditors = 0;
+
+        vscode.window.registerCustomEditorProvider(CrumbsEditorProvider.viewType, this, {
+            webviewOptions: { retainContextWhenHidden: true },
+            supportsMultipleEditorsPerDocument: true,
+        });
     }
 
     openCustomDocument(uri: vscode.Uri): CrumbsDocument {
