@@ -1,4 +1,13 @@
-import { CellKeyPressEvent, ColDef, ColumnApi, Grid, GridApi, GridOptions, RowClickedEvent } from "ag-grid-community";
+import {
+    CellKeyPressEvent,
+    ColDef,
+    ColumnApi,
+    Grid,
+    GridApi,
+    GridOptions,
+    RowClickedEvent,
+    RowDoubleClickedEvent,
+} from "ag-grid-community";
 import { zipObject } from "lodash";
 
 class Editor {
@@ -48,6 +57,8 @@ class Editor {
                 this.api.setRowData(this.rowsToRowNodes((data as EditorSetRowsMessage).rows));
                 this.columnApi.autoSizeAllColumns();
                 break;
+            case "ensureRowVisible":
+                this.api.ensureNodeVisible(this.api.getRowNode((data as EditorEnsureRowVisibleMessage).rowId));
         }
     }
 
@@ -59,16 +70,19 @@ class Editor {
         this.postMessage<WebviewSetFrameTreeMessage>({ type: "setFrameTree", frameNumber: event.data.crumbsFrameNumber });
     }
 
-    private onRowDoubleClicked() {
-        this.postMessage<WebviewfocusFrameTreeMessage>({ type: "focusFrameTree" });
+    private onRowDoubleClicked(event: RowDoubleClickedEvent) {
+        this.postMessage<WebviewfocusFrameTreeMessage>({ type: "focusFrameTree", rowId: event.node.id as string });
     }
 
     private onCellKeyPress(event: CellKeyPressEvent) {
         const kEvent = <KeyboardEvent>event.event;
-        switch(kEvent.key) {
+        switch (kEvent.key) {
             case "Enter":
-                this.postMessage<WebviewSetFrameTreeMessage>({ type: "setFrameTree", frameNumber: event.data.crumbsFrameNumber });
-                this.postMessage<WebviewfocusFrameTreeMessage>({ type: "focusFrameTree" });
+                this.postMessage<WebviewSetFrameTreeMessage>({
+                    type: "setFrameTree",
+                    frameNumber: event.data.crumbsFrameNumber,
+                });
+                this.postMessage<WebviewfocusFrameTreeMessage>({ type: "focusFrameTree", rowId: event.node.id as string });
         }
     }
 

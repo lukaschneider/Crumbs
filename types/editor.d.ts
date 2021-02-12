@@ -13,16 +13,17 @@ interface WebviewSetFrameTreeMessage extends WebviewMessage {
 }
 
 interface WebviewfocusFrameTreeMessage extends WebviewMessage {
-    type: "focusFrameTree"
+    type: "focusFrameTree";
+    rowId: string;
 }
 
 /* Messages from the Editor to the Webview */
 interface EditorMessage {
-    type: "setColumns" | "appendRows" | "setRows";
+    type: "setColumns" | "appendRows" | "setRows" | "ensureRowVisible";
 }
 
 interface EditorSetColumnsMessage extends EditorMessage {
-    type: "setColumns",
+    type: "setColumns";
     body?: CrumbsConfigColumn[];
 }
 
@@ -34,4 +35,9 @@ interface EditorAppendRowsMessage extends EditorMessage {
 interface EditorSetRowsMessage extends EditorMessage {
     type: "setRows";
     rows: SharkdRow[];
+}
+
+interface EditorEnsureRowVisibleMessage extends EditorMessage {
+    type: "ensureRowVisible";
+    rowId: string;
 }

@@ -57,6 +57,10 @@ export default class CrumbsEditor {
                 break;
             case "focusFrameTree":
                 CrumbsEditor.onFocusFrameTree.fire();
+                this.postMessage<EditorEnsureRowVisibleMessage>({
+                    type: "ensureRowVisible",
+                    rowId: (message as WebviewfocusFrameTreeMessage).rowId,
+                });
                 break;
         }
     }
