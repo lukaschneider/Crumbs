@@ -23,8 +23,8 @@ export default class CrumbsEditorProvider implements vscode.CustomReadonlyEditor
         return new CrumbsDocument(uri);
     }
 
-    resolveCustomEditor(document: CrumbsDocument, webviewPanel: vscode.WebviewPanel): void {
-        vscode.window.withProgress(
+    async resolveCustomEditor(document: CrumbsDocument, webviewPanel: vscode.WebviewPanel): Promise<void> {
+        await vscode.window.withProgress(
             { location: vscode.ProgressLocation.Window, title: `Loading ${document.uri.path}` },
             async (progress) => {
                 return new Promise<void>(async (resolve, reject) => {
