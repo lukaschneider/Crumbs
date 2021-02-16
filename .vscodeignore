@@ -1,5 +1,6 @@
 *
 
-!dist
-!media
-!package.json
+.vscode
+node_modules
+src
+types

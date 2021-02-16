@@ -1,14 +1,9 @@
 import * as vscode from "vscode";
 
 import CrumbsEditorProvider from "./crumbsEditorProvider";
+import CrumbsFrameTree from "./crumbsFrameTree";
 
 export function activate(context: vscode.ExtensionContext) {
-    context.subscriptions.push(
-        vscode.window.registerCustomEditorProvider(CrumbsEditorProvider.viewType, new CrumbsEditorProvider(context), {
-            supportsMultipleEditorsPerDocument: true,
-            webviewOptions: {
-                retainContextWhenHidden: true,
-            },
-        }),
-    );
+    new CrumbsEditorProvider(context);
+    new CrumbsFrameTree();
 }

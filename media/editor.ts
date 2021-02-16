@@ -1,4 +1,13 @@
-import { ColDef, ColumnApi, Grid, GridApi, GridOptions } from "ag-grid-community";
+import {
+    CellKeyPressEvent,
+    ColDef,
+    ColumnApi,
+    Grid,
+    GridApi,
+    GridOptions,
+    RowClickedEvent,
+    RowDoubleClickedEvent,
+} from "ag-grid-community";
 import { zipObject } from "lodash";
 
 class Editor {
@@ -19,6 +28,9 @@ class Editor {
             rowSelection: "multiple",
             suppressLoadingOverlay: true,
             suppressColumnVirtualisation: true,
+            onRowClicked: this.onRowClicked.bind(this),
+            onRowDoubleClicked: this.onRowDoubleClicked.bind(this),
+            onCellKeyPress: this.onCellKeyPress.bind(this),
         };
 
         new Grid(gridDiv, gridOptions);
@@ -30,7 +42,7 @@ class Editor {
 
         // @ts-ignore
         this.vscode = acquireVsCodeApi();
-        this.vscode.postMessage({ type: "ready" });
+        this.postMessage<WebviewReadyMessage>({ type: "ready" });
     }
 
     private onMessage({ data }: { data: EditorMessage }) {
@@ -39,12 +51,38 @@ class Editor {
                 this.api.setColumnDefs(this.createColumnDefs((data as EditorSetColumnsMessage).body));
                 break;
             case "appendRows":
-                this.appendRows((data as EditorAppendRowsMessage).body);
+                this.appendRows((data as EditorAppendRowsMessage).rows);
                 break;
             case "setRows":
-                this.api.setRowData(this.rowsToRowNodes((data as EditorSetRowsMessage).body));
+                this.api.setRowData(this.rowsToRowNodes((data as EditorSetRowsMessage).rows));
                 this.columnApi.autoSizeAllColumns();
                 break;
+            case "ensureRowVisible":
+                this.api.ensureNodeVisible(this.api.getRowNode((data as EditorEnsureRowVisibleMessage).rowId));
+        }
+    }
+
+    private postMessage<MessageType>(message: MessageType) {
+        this.vscode.postMessage(message);
+    }
+
+    private onRowClicked(event: RowClickedEvent) {
+        this.postMessage<WebviewSetFrameTreeMessage>({ type: "setFrameTree", frameNumber: event.data.crumbsFrameNumber });
+    }
+
+    private onRowDoubleClicked(event: RowDoubleClickedEvent) {
+        this.postMessage<WebviewfocusFrameTreeMessage>({ type: "focusFrameTree", rowId: event.node.id as string });
+    }
+
+    private onCellKeyPress(event: CellKeyPressEvent) {
+        const kEvent = <KeyboardEvent>event.event;
+        switch (kEvent.key) {
+            case "Enter":
+                this.postMessage<WebviewSetFrameTreeMessage>({
+                    type: "setFrameTree",
+                    frameNumber: event.data.crumbsFrameNumber,
+                });
+                this.postMessage<WebviewfocusFrameTreeMessage>({ type: "focusFrameTree", rowId: event.node.id as string });
         }
     }
 
@@ -69,8 +107,8 @@ class Editor {
                 row.c.map((field: string) => tryCastToNumber(field)),
             );
 
-            rowNodeData.bg = `#${row.bg}`;
-            rowNodeData.fg = `#${row.fg}`;
+            // This field is used to set the Frame Tree View
+            rowNodeData.crumbsFrameNumber = row.num;
 
             return rowNodeData;
         });

@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as path from "path";
 import * as pug from "pug";
 import { min } from "lodash";
 
@@ -9,21 +10,29 @@ export default class CrumbsEditor {
     private document: CrumbsDocument;
     private webviewPanel: vscode.WebviewPanel;
 
+    static readonly onFocusFrameTree = new vscode.EventEmitter<void>();
+    static readonly onSetFrameTree = new vscode.EventEmitter<SharkdTreeNode[]>();
+
     constructor(webviewPanel: vscode.WebviewPanel, document: CrumbsDocument, context: vscode.ExtensionContext) {
         this.webviewPanel = webviewPanel;
         this.document = document;
         this.context = context;
 
-        const getAbsoluteWebviewUri = (relativePath: string) =>
-            webviewPanel.webview.asWebviewUri(vscode.Uri.file(this.context.asAbsolutePath(relativePath))).toString();
+        const getAbsoluteWebviewUri = (...relativePath: string[]) =>
+            webviewPanel.webview
+                .asWebviewUri(vscode.Uri.file(path.join(this.context.extensionPath, ...relativePath)))
+                .toString();
 
-        webviewPanel.webview.options = { enableScripts: true };
+        webviewPanel.webview.options = {
+            enableScripts: true,
+            localResourceRoots: [vscode.Uri.file(this.context.extensionPath)],
+        };
 
         webviewPanel.webview.html = pug.renderFile(this.context.asAbsolutePath("media/editor.pug"), {
-            css: getAbsoluteWebviewUri("media/editor.css"),
-            gridCss: getAbsoluteWebviewUri("node_modules/ag-grid-community/dist/styles/ag-grid.min.css"),
-            gridTheme: getAbsoluteWebviewUri("node_modules/ag-grid-community/dist/styles/ag-theme-alpine.min.css"),
-            script: getAbsoluteWebviewUri("dist/editor.js"),
+            css: getAbsoluteWebviewUri("media", "editor.css"),
+            gridCss: getAbsoluteWebviewUri("dist", "ag-grid.min.css"),
+            gridTheme: getAbsoluteWebviewUri("dist", "ag-theme-alpine.min.css"),
+            script: getAbsoluteWebviewUri("dist", "editor.js"),
         });
 
         webviewPanel.webview.onDidReceiveMessage(this.onMessage.bind(this));
@@ -38,9 +47,21 @@ export default class CrumbsEditor {
                 });
                 this.postMessage<EditorSetRowsMessage>({
                     type: "setRows",
-                    body: await this.document.sharkd.getRows(0, 100),
+                    rows: await this.document.sharkd.getRows(0, 100),
                 });
                 this.rowLoop(100, 1000);
+                break;
+            case "setFrameTree":
+                const frame = await this.document.sharkd.getFrame((message as WebviewSetFrameTreeMessage).frameNumber);
+                CrumbsEditor.onSetFrameTree.fire(frame.tree);
+                break;
+            case "focusFrameTree":
+                CrumbsEditor.onFocusFrameTree.fire();
+                this.postMessage<EditorEnsureRowVisibleMessage>({
+                    type: "ensureRowVisible",
+                    rowId: (message as WebviewfocusFrameTreeMessage).rowId,
+                });
+                break;
         }
     }
 
@@ -50,7 +71,7 @@ export default class CrumbsEditor {
         timeout = <number>min([timeout * 2, 4096]);
 
         if (rows.length !== 0) {
-            this.postMessage<EditorAppendRowsMessage>({ type: "appendRows", body: rows });
+            this.postMessage<EditorAppendRowsMessage>({ type: "appendRows", rows });
             timeout = 1;
             skip += rows.length;
         }

@@ -16,7 +16,6 @@
     ],
     "main": "./dist/extension.js",
     "license": "UNLICENSED",
-    "private": true,
     "contributes": {
         "configuration": [
             {
@@ -91,14 +90,12 @@
                                     "description": "Which occurence of a filed should be used. Can be left out most of the time."
                                 }
                             }
-                        },
-                        "scope": "resource"
+                        }
                     },
                     "crumbs.editor.chunkSize": {
                         "type": "integer",
                         "default": 1000,
-                        "description": "To minimise performance problems and provide information as quickly as possible, Crumbs divides packets into many chunks.",
-                        "scope": "resource"
+                        "description": "To minimise performance problems and provide information as quickly as possible, Crumbs divides packets into many chunks."
                     }
                 }
             }
@@ -204,6 +201,31 @@
                 ],
                 "priority": "default"
             }
+        ],
+        "viewsContainers": {
+            "panel": [
+                {
+                    "id": "crumbsFrameDetails",
+                    "title": "Frame",
+                    "icon": "$(symbol-misc)"
+                }
+            ]
+        },
+        "views": {
+            "crumbsFrameDetails": [
+                {
+                    "id": "crumbsFrameTree",
+                    "name": "Tree",
+                    "type": "tree",
+                    "when": "crumbs:activeEditors > 0"
+                }
+            ]
+        },
+        "viewsWelcome": [
+            {
+                "view": "crumbsFrameTree",
+                "contents": "Click on a row in the Packet Editor to see the Frame tree."
+            }
         ]
     },
     "scripts": {
@@ -224,6 +246,7 @@
         "@types/vscode": "^1.52.0",
         "@typescript-eslint/eslint-plugin": "^2.30.0",
         "@typescript-eslint/parser": "^2.30.0",
+        "copy-webpack-plugin": "^7.0.0",
         "eslint": "^6.8.0",
         "glob": "^7.1.6",
         "mocha": "^7.1.2",
