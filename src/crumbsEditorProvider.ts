@@ -41,6 +41,10 @@ export default class CrumbsEditorProvider implements vscode.CustomReadonlyEditor
                     webviewPanel.onDidDispose(() => {
                         this.activeEditors--;
                         vscode.commands.executeCommand("setContext", "crumbs:activeEditors", this.activeEditors);
+
+                        if (this.activeEditors == 0) {
+                            CrumbsEditor.onSetFrameTree.fire([]);
+                        }
                     });
 
                     resolve();

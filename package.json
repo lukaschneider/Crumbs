@@ -207,7 +207,7 @@
                 {
                     "id": "crumbsFrameDetails",
                     "title": "Frame",
-                    "icon": "icon"
+                    "icon": "$(symbol-misc)"
                 }
             ]
         },
@@ -220,7 +220,13 @@
                     "when": "crumbs:activeEditors > 0"
                 }
             ]
-        }
+        },
+        "viewsWelcome": [
+            {
+                "view": "crumbsFrameTree",
+                "contents": "Click on a row in the Packet Editor to see the Frame tree."
+            }
+        ]
     },
     "scripts": {
         "vscode:prepublish": "yarn webpack",
