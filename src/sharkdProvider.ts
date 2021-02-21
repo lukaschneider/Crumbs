@@ -34,7 +34,7 @@ export default class SharkdProvider {
         return new Promise<ResponseType>(async (resolve, reject) => {
             const releaseRequestMutex = await this.requestMutex.acquire();
             try {
-                (await this.socket).write(request);
+                (await this.socket).write(request + "\n");
                 (await this.socket).pipe(ndjson.parse()).once("data", async (response) => {
                     (await this.socket).removeAllListeners();
                     releaseRequestMutex();
@@ -62,16 +62,16 @@ export default class SharkdProvider {
         });
 
         return this.request<SharkdRow[]>(
-            `{"req": "frames", ${skip ? `"skip":` + skip : ""}, ${limit ? `"limit":` + limit : ""}, ${columnsRequest}}\n`,
+            `{"req": "frames", ${skip ? `"skip":` + skip : ""}, ${limit ? `"limit":` + limit : ""}, ${columnsRequest}}`,
         );
     }
 
     async loadFile(path: string) {
-        const response = await this.request<SharkdError>(`{"req": "load", "file": "${path}"}\n`);
+        const response = await this.request<SharkdError>(`{"req": "load", "file": "${path}"}`);
         return response.err === 0;
     }
 
     async getFrame(frameNumber: number) {
-        return this.request<SharkdFrame>(`{"req": "frame", "frame": ${frameNumber}, "proto": 1}\n`);
+        return this.request<SharkdFrame>(`{"req": "frame", "frame": ${frameNumber}, "proto": 1}`);
     }
 }
