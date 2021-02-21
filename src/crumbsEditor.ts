@@ -48,6 +48,7 @@ export default class CrumbsEditor {
                 this.postMessage<EditorSetRowsMessage>({
                     type: "setRows",
                     rows: await this.document.sharkd.getRows(0, 100),
+                    colored: vscode.workspace.getConfiguration("crumbs").get("editor.coloredRows"),
                 });
                 this.rowLoop(100, 1000);
                 break;

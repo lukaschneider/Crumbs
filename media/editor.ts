@@ -7,6 +7,7 @@ import {
     GridOptions,
     RowClickedEvent,
     RowDoubleClickedEvent,
+    RowNode,
 } from "ag-grid-community";
 import { zipObject } from "lodash";
 
@@ -15,7 +16,11 @@ class Editor {
     private columnApi: ColumnApi;
     private vscode: any;
 
+    private coloredRows?: boolean;
+
     constructor() {
+        this.coloredRows = false;
+
         const gridDiv = <HTMLElement>document.querySelector("#grid");
         const gridOptions: GridOptions = {
             defaultColDef: {
@@ -28,6 +33,9 @@ class Editor {
             rowSelection: "multiple",
             suppressLoadingOverlay: true,
             suppressColumnVirtualisation: true,
+            getRowStyle: (node: RowNode) => {
+                return this.coloredRows ? { "background-color": node.data.bg, color: node.data.fg } : {};
+            },
             onRowClicked: this.onRowClicked.bind(this),
             onRowDoubleClicked: this.onRowDoubleClicked.bind(this),
             onCellKeyPress: this.onCellKeyPress.bind(this),
@@ -54,6 +62,7 @@ class Editor {
                 this.appendRows((data as EditorAppendRowsMessage).rows);
                 break;
             case "setRows":
+                this.coloredRows = (data as EditorSetRowsMessage).colored;
                 this.api.setRowData(this.rowsToRowNodes((data as EditorSetRowsMessage).rows));
                 this.columnApi.autoSizeAllColumns();
                 break;
@@ -109,6 +118,10 @@ class Editor {
 
             // This field is used to set the Frame Tree View
             rowNodeData.crumbsFrameNumber = row.num;
+
+            // Row colouring
+            rowNodeData.bg = "#" + row.bg;
+            rowNodeData.fg = "#" + row.fg;
 
             return rowNodeData;
         });

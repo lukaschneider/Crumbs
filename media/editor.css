@@ -60,10 +60,10 @@ body,
     border-color: var(--vscode-editor-lineHighlightBorder);
 }
 
-.ag-theme-alpine .ag-row.ag-row-hover,
-.ag-row.ag-row-focus {
-    background-color: var(--vscode-editor-hoverHighlightBackground);
-    color: var(--vscode-editor-foreground);
+.ag-theme-alpine .ag-row.ag-row-hover:not(.ag-row-selected),
+.ag-row.ag-row-focus:not(.ag-row-selected) {
+    background-color: var(--vscode-editor-hoverHighlightBackground) !important;
+    color: var(--vscode-editor-foreground) !important;
 }
 
 .ag-theme-alpine .ag-row-selected {

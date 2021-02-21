@@ -35,6 +35,7 @@ interface EditorAppendRowsMessage extends EditorMessage {
 interface EditorSetRowsMessage extends EditorMessage {
     type: "setRows";
     rows: SharkdRow[];
+    colored?: boolean;
 }
 
 interface EditorEnsureRowVisibleMessage extends EditorMessage {
