@@ -1,4 +1,5 @@
 import {
+    CellFocusedEvent,
     CellKeyPressEvent,
     ColDef,
     ColumnApi,
@@ -39,6 +40,7 @@ class Editor {
             onRowClicked: this.onRowClicked.bind(this),
             onRowDoubleClicked: this.onRowDoubleClicked.bind(this),
             onCellKeyPress: this.onCellKeyPress.bind(this),
+            onCellFocused: this.onCellFocused.bind(this),
         };
 
         new Grid(gridDiv, gridOptions);
@@ -93,6 +95,13 @@ class Editor {
                 });
                 this.postMessage<WebviewfocusFrameTreeMessage>({ type: "focusFrameTree", rowId: event.node.id as string });
         }
+    }
+
+    private onCellFocused(event: CellFocusedEvent) {
+        this.postMessage<WebviewSetFrameTreeMessage>({
+            type: "setFrameTree",
+            frameNumber: this.api.getDisplayedRowAtIndex(event.rowIndex || 0)?.data.crumbsFrameNumber,
+        });
     }
 
     private rowsToRowNodes(rows: SharkdRow[]) {
