@@ -30,7 +30,7 @@ body,
 .ag-theme-alpine .ag-header-row {
     font-family: var(--vscode-font-family);
     font-size: var(--vscode-font-size);
-    line-height: 35px;
+    line-height: 28x;
 
     color: var(--vscode-editor-foreground);
 }
@@ -72,7 +72,7 @@ body,
 }
 
 .ag-theme-alpine .ag-cell {
-    line-height: 30px;
+    line-height: 25px;
 }
 
 .ag-theme-alpine .ag-has-focus .ag-cell.ag-cell-focus {
