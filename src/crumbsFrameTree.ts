@@ -15,15 +15,16 @@ export default class CrumbsFrameTree {
             treeDataProvider: this.crumbsFrameTreeProvider,
         });
 
-        CrumbsEditor.onFocusFrameTree.event(() => {
-            this.reveal();
+        CrumbsEditor.onFocusFrameTree.event(async (callback) => {
+            await this.reveal();
+            callback();
         });
     }
 
-    private reveal() {
+    private async reveal() {
         const rootTreeItems = this.crumbsFrameTreeProvider.getRootTreeItems();
         if (rootTreeItems) {
-            this.crumbsFrameTree.reveal(rootTreeItems[0], { expand: false, focus: false, select: false });
+            await this.crumbsFrameTree.reveal(rootTreeItems[0], { expand: false, focus: false, select: false });
         }
     }
 }

@@ -10,7 +10,7 @@ export default class CrumbsEditor {
     private document: CrumbsDocument;
     private webviewPanel: vscode.WebviewPanel;
 
-    static readonly onFocusFrameTree = new vscode.EventEmitter<void>();
+    static readonly onFocusFrameTree = new vscode.EventEmitter<Function>();
     static readonly onSetFrameTree = new vscode.EventEmitter<SharkdTreeNode[]>();
 
     constructor(webviewPanel: vscode.WebviewPanel, document: CrumbsDocument, context: vscode.ExtensionContext) {
@@ -57,10 +57,11 @@ export default class CrumbsEditor {
                 CrumbsEditor.onSetFrameTree.fire(frame.tree);
                 break;
             case "focusFrameTree":
-                CrumbsEditor.onFocusFrameTree.fire();
-                this.postMessage<EditorEnsureRowVisibleMessage>({
-                    type: "ensureRowVisible",
-                    rowId: (message as WebviewfocusFrameTreeMessage).rowId,
+                CrumbsEditor.onFocusFrameTree.fire(() => {
+                    this.postMessage<EditorEnsureRowVisibleMessage>({
+                        type: "ensureRowVisible",
+                        rowId: (message as WebviewfocusFrameTreeMessage).rowId,
+                    });
                 });
                 break;
         }
