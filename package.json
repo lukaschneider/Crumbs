@@ -1,16 +1,28 @@
 {
     "name": "crumbs",
     "displayName": "Crumbs",
-    "publisher": "lukaschneider",
-    "repository": "github:lukaschneider/Crumbs",
-    "description": "Open Packet Traces in Visual Studio Code",
     "version": "0.0.1",
-    "engines": {
-        "vscode": "^1.52.0"
+    "publisher": "lukaschneider",
+    "description": "Open Packet Traces in Visual Studio Code",
+    "author": {
+        "name": "lukaschneider"
     },
     "categories": [
         "Other"
     ],
+    "preview": true,
+    "icon": "assets/icon.png",
+    "homepage": "https://github.com/lukaschneider/Crumbs/blob/main/README.md",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/lukaschneider/Crumbs.git"
+    },
+    "bugs": {
+        "url": "https://github.com/lukaschneider/Crumbs/issues"
+    },
+    "engines": {
+        "vscode": "^1.52.0"
+    },
     "activationEvents": [
         "onCustomEditor:crumbs.editor"
     ],
@@ -100,7 +112,7 @@
                     "crumbs.editor.chunkSize": {
                         "type": "integer",
                         "default": 1000,
-                        "description": "To minimise performance problems and provide information as quickly as possible, Crumbs divides packets into many chunks."
+                        "description": "To minimise performance problems and provide information as quickly as possible, Crumbs divides the trace file into many chunks."
                     }
                 }
             }
