@@ -1,7 +1,7 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "rootDir": "media"
+        "rootDir": "webviews"
     },
     "exclude": ["src"]
 }

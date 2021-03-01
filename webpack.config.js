@@ -26,7 +26,7 @@ module.exports = [
                 {
                     test: /\.ts$/,
                     include: /(node_modules|src)/,
-                    exclude: [/media/],
+                    exclude: [/webviews/],
                     use: [
                         {
                             loader: "ts-loader",
@@ -40,7 +40,7 @@ module.exports = [
         },
     },
     {
-        entry: "./media/editor.ts",
+        entry: "./webviews/editor.ts",
         output: {
             path: path.resolve(__dirname, "dist"),
             filename: "editor.js",
@@ -53,7 +53,7 @@ module.exports = [
             rules: [
                 {
                     test: /\.ts$/,
-                    include: /(node_modules|media)/,
+                    include: /(node_modules|webviews)/,
                     use: [
                         {
                             loader: "ts-loader",

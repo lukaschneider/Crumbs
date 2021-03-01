@@ -28,8 +28,8 @@ export default class CrumbsEditor {
             localResourceRoots: [vscode.Uri.file(this.context.extensionPath)],
         };
 
-        webviewPanel.webview.html = pug.renderFile(this.context.asAbsolutePath("media/editor.pug"), {
-            css: getAbsoluteWebviewUri("media", "editor.css"),
+        webviewPanel.webview.html = pug.renderFile(this.context.asAbsolutePath("webviews/editor.pug"), {
+            css: getAbsoluteWebviewUri("webviews", "editor.css"),
             gridCss: getAbsoluteWebviewUri("dist", "ag-grid.min.css"),
             gridTheme: getAbsoluteWebviewUri("dist", "ag-theme-alpine.min.css"),
             script: getAbsoluteWebviewUri("dist", "editor.js"),
