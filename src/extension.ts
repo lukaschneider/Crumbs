@@ -1,9 +1,7 @@
-import * as vscode from "vscode";
+import * as vscode from "vscode"
 
-import CrumbsEditorProvider from "./crumbsEditorProvider";
-import CrumbsFrameTree from "./crumbsFrameTree";
+import PacketEditorProvider from "./packetEditorProvider"
 
 export function activate(context: vscode.ExtensionContext) {
-    new CrumbsEditorProvider(context);
-    new CrumbsFrameTree();
+	new PacketEditorProvider(context)
 }

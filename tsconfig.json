@@ -1,11 +1,18 @@
 {
-    "compilerOptions": {
-        "moduleResolution": "node",
-        "target": "es6",
-        "outDir": "dist",
-        "lib": ["es6", "DOM"],
-        "sourceMap": true,
-        "typeRoots": ["types"],
-        "strict": true
-    },
+	"compilerOptions": {
+		"module": "CommonJS",
+		"target": "ES6",
+		"outDir": "out",
+		"lib": [
+			"ES6"
+		],
+		"sourceMap": true,
+		"rootDir": "src",
+		"strict": true
+	},
+	"exclude": [
+		"node_modules",
+		".vscode-test",
+		"src/webviews"
+	]
 }

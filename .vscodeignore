@@ -1,6 +1,5 @@
-*
-
-node_modules
-types
+**/*
 
 !README.md
+!CHANGELOG.md
+!out/*

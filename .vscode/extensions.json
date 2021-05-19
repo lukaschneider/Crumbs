@@ -3,7 +3,5 @@
 	// for the documentation about the extensions.json format
 	"recommendations": [
 		"dbaeumer.vscode-eslint",
-		"wayou.vscode-todo-highlight",
-		"esbenp.prettier-vscode",
 	]
 }
