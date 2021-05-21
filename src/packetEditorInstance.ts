@@ -1,16 +1,21 @@
 import * as vscode from "vscode"
+import { Mutex } from "async-mutex"
 
 import Document from "./document"
 
 export default class PacketEditorInstance {
-    document: Document
-    webviewPanel: vscode.WebviewPanel
-    context: vscode.ExtensionContext
+    private cancelReset: boolean
+    private context: vscode.ExtensionContext
+    private document: Document
+    private resetMutex: Mutex
+    private webviewPanel: vscode.WebviewPanel
 
     constructor(document: Document, webviewPanel: vscode.WebviewPanel, context: vscode.ExtensionContext) {
-        this.document = document
-        this.webviewPanel = webviewPanel
+        this.cancelReset = false
         this.context = context
+        this.document = document
+        this.resetMutex = new Mutex()
+        this.webviewPanel = webviewPanel
 
         webviewPanel.webview.options = {
             enableScripts: true,
@@ -19,24 +24,29 @@ export default class PacketEditorInstance {
         webviewPanel.webview.html = this.generateWebviewHtml()
 
         webviewPanel.webview.onDidReceiveMessage(this.onMessage.bind(this))
+
+        vscode.workspace.onDidChangeConfiguration(this.onConfigure.bind(this))
     }
 
     async reset() {
-        const columns: ConfigColumn[] = vscode.workspace.getConfiguration("crumbs").get("packetEditor.columns") || []
-        const message: PacketEditorInstanceResetMessage = { type: "packetEditorInstanceReset", columns: columns }
-        this.webviewPanel.webview.postMessage(message)
+        await this.resetMutex.runExclusive(async () => {
+            this.cancelReset = false
+            const columns: ConfigColumn[] = vscode.workspace.getConfiguration("crumbs").get("packetEditor.columns") || []
+            const message: PacketEditorInstanceResetMessage = { type: "packetEditorInstanceReset", columns: columns }
+            this.webviewPanel.webview.postMessage(message)
 
-        await this.getFrames(columns)
+            await this.getFrames(columns)
+        })
     }
 
     async getFrames(columns: ConfigColumn[], skip: number = 0, limit: number = 5000) {
         const frames = await this.document.getFrames(columns, skip, limit)
 
-        if (frames.length !== 0) {
+        if (frames.length !== 0 && !this.cancelReset) {
             const message: PacketEditorInstanceFramesMessage = { type: "packetEditorInstanceFrames", frames: frames }
             this.webviewPanel.webview.postMessage(message)
 
-            this.getFrames(
+            await this.getFrames(
                 columns,
                 skip + frames.length,
                 vscode.workspace.getConfiguration("crumbs").get("packetEditor.chunkSize"))
@@ -46,7 +56,15 @@ export default class PacketEditorInstance {
     private onMessage(message: PacketEditorWebviewMessage) {
         switch (message.type) {
             case "packetEditorWebviewReady":
+                this.cancelReset = true
+                this.resetMutex.cancel()
                 this.reset()
+        }
+    }
+
+    private onConfigure(event: vscode.ConfigurationChangeEvent) {
+        if (event.affectsConfiguration("crumbs")) {
+            this.reset()
         }
     }
 

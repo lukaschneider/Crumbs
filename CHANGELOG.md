@@ -7,6 +7,7 @@ React Rewrite 😎. This will make it easier to build upon in the future.
 
 ### Added
 - Possiblity to pin columns.
+- Automatically reload the Packet Editor if the configuration changes.
 
 ## [0.1.0] - 2021-03-01
 This is a preview release for me to test the concept.

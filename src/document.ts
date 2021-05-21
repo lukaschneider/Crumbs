@@ -9,15 +9,15 @@ import { v4 as uuid } from "uuid"
 export default class Document extends vscode.Disposable implements vscode.CustomDocument {
     uri: vscode.Uri
 
-    private mutex: Mutex
     private socket: Promise<Socket>
     private process: ChildProcess
+    private requestMutex: Mutex
 
     constructor(uri: vscode.Uri) {
         super(() => { this.process.kill() })
 
         this.uri = uri
-        this.mutex = new Mutex()
+        this.requestMutex = new Mutex()
 
         const socketUrl = new url(`/tmp/vscode-crumbs-${uuid()}.sock`, "unix://")
         const sharkd: string = vscode.workspace.getConfiguration("crumbs").get("sharkd") || "sharkd"
@@ -62,7 +62,7 @@ export default class Document extends vscode.Disposable implements vscode.Custom
 
     private request<RequestType, ResponseType>(request: RequestType): Promise<ResponseType> {
         return new Promise(async resolve => {
-            const release = await this.mutex.acquire()
+            const release = await this.requestMutex.acquire()
             const socket = await this.socket
 
             try {

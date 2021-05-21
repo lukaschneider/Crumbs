@@ -20,7 +20,7 @@ export default class PacketEditor extends React.Component {
         return (
             <div id="grid-root" className="ag-theme-alpine">
                 <AgGridReact
-                    asyncTransactionWaitMillis={100}
+                    asyncTransactionWaitMillis={250}
                     defaultColDef={{
                         resizable: true,
                         sortable: true,
@@ -49,7 +49,12 @@ export default class PacketEditor extends React.Component {
     }
 
     private reset(message: PacketEditorInstanceResetMessage) {
+        this.initialized = false;
+
+        this.gridApi?.flushAsyncTransactions()
+
         this.gridApi?.setRowData([])
+        this.gridApi?.setColumnDefs([])
         this.gridApi?.setColumnDefs(
             message.columns.map((column) => {
                 return {
