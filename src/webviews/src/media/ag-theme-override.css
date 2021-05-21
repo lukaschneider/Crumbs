@@ -18,8 +18,6 @@ html, body, #root, #grid-root {
     --ag-input-focus-border-color: transparent;
 
     --ag-row-border-color: var(--vscode-contrastBorder, transparent);
-    --ag-row-hover-color: var(--vscode-list-hoverBackground, var(--vscode-editor-inactiveSelectionBackground));
-    --ag-selected-row-background-color: var(--vscode-list-activeSelectionBackground, var(--vscode-editor-selectionBackground));
     --ag-odd-row-background-color: hsla(0,0%,51%,.04);
 
     font-family: var(--vscode-editor-font-family);
@@ -75,12 +73,18 @@ html, body, #root, #grid-root {
     box-shadow: none;
 }
 
+.ag-theme-alpine .ag-row-hover {
+    background-color: var(--vscode-list-hoverBackground, var(--vscode-editor-inactiveSelectionBackground)) !important;
+    color: var(--vscode-list-hoverForeground, var(--vscode-editor-inactiveSelectionForeground)) !important
+}
+
 .ag-theme-alpine .ag-row-selected {
-    color: var(--vscode-list-activeSelectionForeground, var(--vscode-editor-selectionForeground));
+    color: var(--vscode-list-activeSelectionForeground, var(--vscode-editor-selectionForeground)) !important;
+    background-color: var(--vscode-list-activeSelectionBackground, var(--vscode-editor-selectionBackground)) !important;
 }
 
 .ag-row:not(.ag-row-selected) > .ag-cell-focus {
-    background-color: var(--vscode-list-focusBackground);
+    background-color: var(--vscode-list-focusBackground) !important;
     color: var(--vscode-list-focusForeground);
 }
 

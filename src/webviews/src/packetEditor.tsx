@@ -1,5 +1,5 @@
 import React from "react"
-import { ColumnApi, ColDef, GridApi, GridReadyEvent } from "ag-grid-community"
+import { ColumnApi, ColDef, GridApi, GridReadyEvent, RowNode } from "ag-grid-community"
 import { AgGridReact } from "ag-grid-react"
 import { zipObject } from "lodash"
 
@@ -10,12 +10,13 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css"
 import "./media/ag-theme-override.css"
 
 export default class PacketEditor extends React.Component {
-    gridApi?: GridApi
-    columnApi?: ColumnApi
+    private gridApi?: GridApi
+    private columnApi?: ColumnApi
 
-    initialized: boolean = false
+    private initialized: boolean = false
 
-
+    private colorCoding: boolean = false
+    
     render() {
         return (
             <div id="grid-root" className="ag-theme-alpine">
@@ -29,6 +30,11 @@ export default class PacketEditor extends React.Component {
                     onGridReady={this.initializeGrid.bind(this)}
                     rowHeight={30}
                     rowSelection={"multiple"}
+                    getRowStyle={(node: RowNode) => {
+                        return this.colorCoding ? {
+                            "background-color": node.data.frameBackgrond, color: node.data.frameForeground
+                        } : {};
+                    }}
                     suppressColumnVirtualisation={true}
                     suppressDragLeaveHidesColumns={true}
                     suppressLoadingOverlay={true}
@@ -55,6 +61,9 @@ export default class PacketEditor extends React.Component {
 
         this.gridApi?.setRowData([])
         this.gridApi?.setColumnDefs([])
+
+        this.colorCoding = message.colorCoding
+
         this.gridApi?.setColumnDefs(
             message.columns.map((column) => {
                 return {

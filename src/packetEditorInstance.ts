@@ -32,7 +32,8 @@ export default class PacketEditorInstance {
         await this.resetMutex.runExclusive(async () => {
             this.cancelReset = false
             const columns: ConfigColumn[] = vscode.workspace.getConfiguration("crumbs").get("packetEditor.columns") || []
-            const message: PacketEditorInstanceResetMessage = { type: "packetEditorInstanceReset", columns: columns }
+            const colorCoding: boolean = vscode.workspace.getConfiguration("crumbs").get("packetEditor.colorCoding") || false
+            const message: PacketEditorInstanceResetMessage = { type: "packetEditorInstanceReset", columns: columns, colorCoding: colorCoding }
             this.webviewPanel.webview.postMessage(message)
 
             await this.getFrames(columns)

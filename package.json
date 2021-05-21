@@ -102,7 +102,7 @@
                             }
                         }
                     },
-                    "crumbs.packetEditor.coloredRows": {
+                    "crumbs.packetEditor.colorCoding": {
                         "type": "boolean",
                         "default": false,
                         "markdownDescription": "Use Wiresharks row coloring rules. **Note:** Might not work ideal with some color themes!"

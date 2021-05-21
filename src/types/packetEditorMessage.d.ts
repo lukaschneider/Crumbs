@@ -6,6 +6,7 @@ interface PacketEditorInstanceMessage {
 interface PacketEditorInstanceResetMessage extends PacketEditorInstanceMessage {
     type: "packetEditorInstanceReset"
     columns: ConfigColumn[]
+    colorCoding: boolean
 }
 
 interface PacketEditorInstanceFramesMessage extends PacketEditorInstanceMessage {
