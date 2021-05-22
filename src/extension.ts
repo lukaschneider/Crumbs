@@ -1,7 +1,7 @@
 import * as vscode from "vscode"
 
-import PacketEditorProvider from "./packetEditorProvider"
+import FrameListProvider from "./frameListProvider"
 
 export function activate(context: vscode.ExtensionContext) {
-	new PacketEditorProvider(context)
+	new FrameListProvider(context)
 }

@@ -9,7 +9,7 @@ import "ag-grid-community/dist/styles/ag-grid.css"
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"
 import "./media/ag-theme-override.css"
 
-export default class PacketEditor extends React.Component {
+export default class FrameList extends React.Component {
     private gridApi?: GridApi
     private columnApi?: ColumnApi
 
@@ -50,11 +50,11 @@ export default class PacketEditor extends React.Component {
 
         window.addEventListener("message", this.onMessage.bind(this))
 
-        const message: PacketEditorWebviewReadyMessage = { type: "packetEditorWebviewReady" }
+        const message: FrameListWebviewReadyMessage = { type: "frameListWebviewReady" }
         vscodeApi.postMessage(message)
     }
 
-    private reset(message: PacketEditorInstanceResetMessage) {
+    private reset(message: FrameListInstanceResetMessage) {
         this.initialized = false;
 
         this.gridApi?.flushAsyncTransactions()
@@ -76,7 +76,7 @@ export default class PacketEditor extends React.Component {
             }))
     }
 
-    private addFrames(message: PacketEditorInstanceFramesMessage) {
+    private addFrames(message: FrameListInstanceFramesMessage) {
         this.gridApi?.applyTransactionAsync({
             add: message.frames.map(frame => {
                 return {
@@ -102,13 +102,13 @@ export default class PacketEditor extends React.Component {
         }
     }
 
-    private onMessage(message: MessageEvent<PacketEditorInstanceMessage>) {
+    private onMessage(message: MessageEvent<FrameListInstanceMessage>) {
         switch (message.data.type) {
-            case "packetEditorInstanceReset":
-                this.reset(message.data as PacketEditorInstanceResetMessage)
+            case "frameListInstanceReset":
+                this.reset(message.data as FrameListInstanceResetMessage)
                 break
-            case "packetEditorInstanceFrames":
-                this.addFrames(message.data as PacketEditorInstanceFramesMessage)
+            case "frameListInstanceFrames":
+                this.addFrames(message.data as FrameListInstanceFramesMessage)
                 break
         }
     }

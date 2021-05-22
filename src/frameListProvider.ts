@@ -1,15 +1,15 @@
 import * as vscode from "vscode"
 
 import Document from "./document"
-import PacketEditorInstance from "./packetEditorInstance"
+import FrameListInstance from "./frameListInstance"
 
-export default class PacketEditorProvider implements vscode.CustomReadonlyEditorProvider {
+export default class FrameListProvider implements vscode.CustomReadonlyEditorProvider {
     private context: vscode.ExtensionContext
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context
 
-        vscode.window.registerCustomEditorProvider("crumbs.PacketEditor", this, {
+        vscode.window.registerCustomEditorProvider("crumbs.FrameList", this, {
             webviewOptions: { retainContextWhenHidden: true },
             supportsMultipleEditorsPerDocument: true,
         })
@@ -20,6 +20,6 @@ export default class PacketEditorProvider implements vscode.CustomReadonlyEditor
     }
 
     resolveCustomEditor(document: Document, webviewPanel: vscode.WebviewPanel): void {
-        new PacketEditorInstance(document, webviewPanel, this.context)
+        new FrameListInstance(document, webviewPanel, this.context)
     }
 }

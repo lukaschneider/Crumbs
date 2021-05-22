@@ -1,12 +1,12 @@
 import React from "react"
 import { render } from "react-dom"
 
-import PacketEditor from "./packetEditor"
+import FrameList from "./frameList"
 
 document.addEventListener("DOMContentLoaded", () => {
     render(
         <React.StrictMode>
-            <PacketEditor />
+            <FrameList />
         </React.StrictMode>,
         document.getElementById("root")
     )

@@ -18,7 +18,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onCustomEditor:crumbs.PacketEditor"
+        "onCustomEditor:crumbs.FrameList"
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -32,7 +32,7 @@
                         "description": "The path to the sharkd binary.",
                         "scope": "machine"
                     },
-                    "crumbs.packetEditor.columns": {
+                    "crumbs.frameList.columns": {
                         "type": "array",
                         "default": [
                             {
@@ -64,7 +64,7 @@
                                 "type": 28
                             }
                         ],
-                        "description": "The columns to be displayed in the editor.",
+                        "description": "The columns to be displayed in the frame list.",
                         "items": {
                             "type": "object",
                             "properties": {
@@ -76,7 +76,7 @@
                                 "pinned": {
                                     "type": "boolean",
                                     "default": false,
-                                    "description": "Pins this column to the left of the packet editor. Default: false."
+                                    "description": "Pins this column to the left of the frame list. Default: false."
                                 },
                                 "title": {
                                     "type": "string",
@@ -102,12 +102,12 @@
                             }
                         }
                     },
-                    "crumbs.packetEditor.colorCoding": {
+                    "crumbs.frameList.colorCoding": {
                         "type": "boolean",
                         "default": false,
                         "markdownDescription": "Use Wiresharks row coloring rules. **Note:** Might not work ideal with some color themes!"
                     },
-                    "crumbs.packetEditor.chunkSize": {
+                    "crumbs.frameList.chunkSize": {
                         "type": "integer",
                         "default": 5000,
                         "description": "To minimise performance problems and provide information as quickly as possible, Crumbs divides trace files into chunks while loading."
@@ -117,8 +117,8 @@
         ],
         "customEditors": [
             {
-                "viewType": "crumbs.PacketEditor",
-                "displayName": "Packet Editor",
+                "viewType": "crumbs.FrameList",
+                "displayName": "Frame List",
                 "selector": [
                     {
                         "filenamePattern": "*.dmp*"

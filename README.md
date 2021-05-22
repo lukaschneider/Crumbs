@@ -28,7 +28,7 @@ If not, please make sure that the correct path is used in the extensions sharkd 
 <br/>
 
 ### Opening Trace Files
-Crumbs is already set as the default editor for a lot of file extensions. If your tracefile does not open the Packet Editor by default please check if the correct editor is selected and if your file type is actually [supported by Wireshark](https://gitlab.com/wireshark/wireshark/-/wikis/FileFormatReference).
+Crumbs is already set as the default editor for a lot of file extensions. If your tracefile does not open the Frame List by default please check if the correct editor is selected and if your file type is actually [supported by Wireshark](https://gitlab.com/wireshark/wireshark/-/wikis/FileFormatReference).
 
 <br/>
 

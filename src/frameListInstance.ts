@@ -3,7 +3,7 @@ import { Mutex } from "async-mutex"
 
 import Document from "./document"
 
-export default class PacketEditorInstance {
+export default class FrameListInstance {
     private cancelReset: boolean
     private context: vscode.ExtensionContext
     private document: Document
@@ -31,9 +31,9 @@ export default class PacketEditorInstance {
     async reset() {
         await this.resetMutex.runExclusive(async () => {
             this.cancelReset = false
-            const columns: ConfigColumn[] = vscode.workspace.getConfiguration("crumbs").get("packetEditor.columns") || []
-            const colorCoding: boolean = vscode.workspace.getConfiguration("crumbs").get("packetEditor.colorCoding") || false
-            const message: PacketEditorInstanceResetMessage = { type: "packetEditorInstanceReset", columns: columns, colorCoding: colorCoding }
+            const columns: ConfigColumn[] = vscode.workspace.getConfiguration("crumbs").get("frameList.columns") || []
+            const colorCoding: boolean = vscode.workspace.getConfiguration("crumbs").get("frameList.colorCoding") || false
+            const message: FrameListInstanceResetMessage = { type: "frameListInstanceReset", columns: columns, colorCoding: colorCoding }
             this.webviewPanel.webview.postMessage(message)
 
             await this.getFrames(columns)
@@ -44,19 +44,19 @@ export default class PacketEditorInstance {
         const frames = await this.document.getFrames(columns, skip, limit)
 
         if (frames.length !== 0 && !this.cancelReset) {
-            const message: PacketEditorInstanceFramesMessage = { type: "packetEditorInstanceFrames", frames: frames }
+            const message: FrameListInstanceFramesMessage = { type: "frameListInstanceFrames", frames: frames }
             this.webviewPanel.webview.postMessage(message)
 
             await this.getFrames(
                 columns,
                 skip + frames.length,
-                vscode.workspace.getConfiguration("crumbs").get("packetEditor.chunkSize"))
+                vscode.workspace.getConfiguration("crumbs").get("frameList.chunkSize"))
         }
     }
 
-    private onMessage(message: PacketEditorWebviewMessage) {
+    private onMessage(message: FrameListWebviewMessage) {
         switch (message.type) {
-            case "packetEditorWebviewReady":
+            case "frameListWebviewReady":
                 this.cancelReset = true
                 this.resetMutex.cancel()
                 this.reset()
