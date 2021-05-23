@@ -4,6 +4,7 @@
     "description": "Open Packet Traces in Visual Studio Code.",
     "version": "0.1.1",
     "publisher": "lukaschneider",
+    "icon": "icon.png",
     "capabilities": {
         "untrustedWorkspaces": {
             "supported": false
