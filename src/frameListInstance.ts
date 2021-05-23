@@ -2,6 +2,7 @@ import * as vscode from "vscode"
 import { Mutex } from "async-mutex"
 
 import Document from "./document"
+import FrameTree from "./frameTree"
 
 export default class FrameListInstance {
     private cancelReset: boolean
@@ -9,13 +10,15 @@ export default class FrameListInstance {
     private document: Document
     private resetMutex: Mutex
     private webviewPanel: vscode.WebviewPanel
+    private frameTree: FrameTree
 
-    constructor(document: Document, webviewPanel: vscode.WebviewPanel, context: vscode.ExtensionContext) {
+    constructor(document: Document, webviewPanel: vscode.WebviewPanel, context: vscode.ExtensionContext, frameTree: FrameTree) {
         this.cancelReset = false
         this.context = context
         this.document = document
         this.resetMutex = new Mutex()
         this.webviewPanel = webviewPanel
+        this.frameTree = frameTree
 
         webviewPanel.webview.options = {
             enableScripts: true,
@@ -54,12 +57,27 @@ export default class FrameListInstance {
         }
     }
 
-    private onMessage(message: FrameListWebviewMessage) {
+    private async onMessage(message: FrameListWebviewMessage) {
         switch (message.type) {
             case "frameListWebviewReady":
                 this.cancelReset = true
                 this.resetMutex.cancel()
                 this.reset()
+                break
+            case "frameListWebviewFrameFocused":
+                const frame = (message as FrameListWebviewFrameFocusedMessage).frame
+                this.frameTree.frameTreeDataProvider.setFrameTreeData(
+                    await this.document.getFrameTree(frame)
+                )
+                break
+            case "frameListWebviewRevealFrameTree":
+                await this.frameTree.reveal()
+                const revealFrameMessage: FrameListInstanceRevealFrameMessage = {
+                    type: "frameListInstanceRevealFrame",
+                    rowNodeId: (message as FrameListWebviewRevealFrameTreeMessage).rowNodeId
+                }
+                this.webviewPanel.webview.postMessage(revealFrameMessage)
+                break
         }
     }
 

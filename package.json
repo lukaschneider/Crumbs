@@ -216,6 +216,34 @@
                 ],
                 "priority": "default"
             }
+        ],
+        "viewsContainers": {
+            "panel": [
+                {
+                    "id": "frameExplorer",
+                    "title": "Frame Explorer",
+                    "icon": "$(telescope)",
+                    "when": "crumbs.context.openDocumentsCount > 0"
+                }
+            ]
+        },
+        "views": {
+            "frameExplorer": [
+                {
+                    "id": "crumbs.frameTree",
+                    "contextualTitle": "Frame Explorer",
+                    "name": "Tree",
+                    "icon": "$(list-tree)",
+                    "type": "tree",
+                    "when": "crumbs.context.openDocumentsCount > 0"
+                }
+            ]
+        },
+        "viewsWelcome": [
+            {
+                "view": "crumbs.frameTree",
+                "contents": "Click on a row in the Frame List to see the frame tree."
+            }
         ]
     },
     "scripts": {

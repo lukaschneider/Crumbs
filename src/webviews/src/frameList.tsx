@@ -1,5 +1,5 @@
 import React from "react"
-import { ColumnApi, ColDef, GridApi, GridReadyEvent, RowNode } from "ag-grid-community"
+import { ColumnApi, ColDef, GridApi, GridReadyEvent, RowNode, CellFocusedEvent, CellKeyPressEvent, RowDoubleClickedEvent } from "ag-grid-community"
 import { AgGridReact } from "ag-grid-react"
 import { zipObject } from "lodash"
 
@@ -16,7 +16,7 @@ export default class FrameList extends React.Component {
     private initialized: boolean = false
 
     private colorCoding: boolean = false
-    
+
     render() {
         return (
             <div id="grid-root" className="ag-theme-alpine">
@@ -28,12 +28,15 @@ export default class FrameList extends React.Component {
                     }}
                     headerHeight={35}
                     onGridReady={this.initializeGrid.bind(this)}
+                    onCellFocused={this.onCellFocused.bind(this)}
+                    onCellKeyPress={this.onCellKeyPress.bind(this)}
+                    onRowDoubleClicked={this.onRowDoubleClicked.bind(this)}
                     rowHeight={30}
                     rowSelection={"multiple"}
                     getRowStyle={(node: RowNode) => {
                         return this.colorCoding ? {
                             "background-color": node.data.frameBackgrond, color: node.data.frameForeground
-                        } : {};
+                        } : {}
                     }}
                     suppressColumnVirtualisation={true}
                     suppressDragLeaveHidesColumns={true}
@@ -52,6 +55,33 @@ export default class FrameList extends React.Component {
 
         const message: FrameListWebviewReadyMessage = { type: "frameListWebviewReady" }
         vscodeApi.postMessage(message)
+    }
+
+    private onCellFocused(event: CellFocusedEvent) {
+        const message: FrameListWebviewFrameFocusedMessage = {
+            type: "frameListWebviewFrameFocused",
+            frame: this.gridApi?.getDisplayedRowAtIndex(event.rowIndex || 0)?.data.frameNumber
+        }
+        vscodeApi.postMessage(message)
+    }
+
+    private onCellKeyPress(event: CellKeyPressEvent) {
+        const keyEvent = event.event as KeyboardEvent
+        switch (keyEvent.key) {
+            case "Enter":
+                this.revealFrameTree(event.node.id)
+        }
+    }
+
+    private onRowDoubleClicked(event: RowDoubleClickedEvent) {
+        this.revealFrameTree(event.node.id)
+    }
+
+    private revealFrameTree(rowNodeId?: string) {
+        if (rowNodeId) {
+            const message: FrameListWebviewRevealFrameTreeMessage = { type: "frameListWebviewRevealFrameTree", rowNodeId: rowNodeId }
+            vscodeApi.postMessage(message)
+        }
     }
 
     private reset(message: FrameListInstanceResetMessage) {
@@ -109,6 +139,12 @@ export default class FrameList extends React.Component {
                 break
             case "frameListInstanceFrames":
                 this.addFrames(message.data as FrameListInstanceFramesMessage)
+                break
+            case "frameListInstanceRevealFrame":
+                this.gridApi?.ensureNodeVisible(
+                    this.gridApi?.getRowNode(
+                        (message.data as FrameListInstanceRevealFrameMessage).rowNodeId)
+                )
                 break
         }
     }

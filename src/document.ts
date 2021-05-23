@@ -12,9 +12,10 @@ export default class Document extends vscode.Disposable implements vscode.Custom
     private socket: Promise<Socket>
     private process: ChildProcess
     private requestMutex: Mutex
+    private disposeEvent = new vscode.EventEmitter<void>()
 
     constructor(uri: vscode.Uri) {
-        super(() => { this.process.kill() })
+        super(() => this.dispose())
 
         this.uri = uri
         this.requestMutex = new Mutex()
@@ -43,6 +44,13 @@ export default class Document extends vscode.Disposable implements vscode.Custom
             })
     }
 
+    dispose() {
+        this.process.kill()
+        this.disposeEvent.fire()
+    }
+
+    readonly onDispose = this.disposeEvent.event
+
     getFrames(columns: ConfigColumn[], skip: number, limit: number) {
         return this.request<SharkdGetFramesRequest, SharkdFrame[]>(Object.assign(
             {
@@ -58,6 +66,15 @@ export default class Document extends vscode.Disposable implements vscode.Custom
                 }
             })
         ))
+    }
+
+    async getFrameTree(frame: number) {
+        const response = await this.request<SharkdGetFrameTreeRequest, SharkdFrameTreeResponse>({
+            req: "frame",
+            frame: frame,
+            proto: 1
+        })
+        return response.tree
     }
 
     private request<RequestType, ResponseType>(request: RequestType): Promise<ResponseType> {
