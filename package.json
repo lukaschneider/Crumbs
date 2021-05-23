@@ -4,6 +4,12 @@
     "description": "Open Packet Traces in Visual Studio Code.",
     "version": "0.1.1",
     "publisher": "lukaschneider",
+    "capabilities": {
+        "untrustedWorkspaces": {
+            "supported": false
+        },
+        "virtualWorkspaces": false
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/lukaschneider/Crumbs"
