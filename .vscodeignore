@@ -1,6 +1,7 @@
-*
-
-node_modules
-types
+**/*
 
 !README.md
+!CHANGELOG.md
+!icon.png
+!demo.png
+!out/*

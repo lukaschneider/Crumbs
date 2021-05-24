@@ -1,0 +1,103 @@
+html, body, #root, #grid-root {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+}
+
+.ag-theme-alpine {
+    --ag-foreground-color: var(--vscode-editor-foreground);
+    --ag-secondary-foreground-color: var(--vscode-icon-foreground);
+    --ag-background-color: var(--vscode-editor-background);
+
+    --ag-header-foreground-color: var(--vscode-editor-foreground);
+    --ag-header-background-color: var(--vscode-editorPane-background);
+
+    --ag-border-color: transparent;
+    --ag-secondary-border-color: transparent;
+    --ag-range-selection-border-color: var(--vscode-list-focusOutline);
+    --ag-input-focus-border-color: transparent;
+
+    --ag-row-border-color: var(--vscode-contrastBorder, transparent);
+    --ag-odd-row-background-color: hsla(0,0%,51%,.04);
+
+    font-family: var(--vscode-editor-font-family);
+    font-style: var(--vscode-editor-font-size);
+}
+
+.ag-theme-alpine .ag-header-row {
+    font-family: var(--vscode-font-family);
+    font-size: calc(var(--vscode-font-size) - 2px);
+    text-transform: uppercase;
+
+    border-bottom: 1px var(--vscode-editorGroup-border) solid !important;
+}
+
+.ag-theme-alpine .ag-icon {
+    font-size: calc(var(--vscode-font-size) - 2px);
+}
+
+.ag-theme-alpine .ag-header-cell-resize::after {
+    border-left: 1px var(--vscode-editorGroup-border) solid;
+    background-color: transparent;
+    width: 0px;
+    z-index: 1;
+}
+
+.ag-theme-alpine .ag-header-cell {
+    padding: 0;
+}
+
+.ag-theme-alpine .ag-header-cell-label {
+    padding: 0 18px;
+}
+
+.ag-header-active {
+    background-color: var(--vscode-list-focusBackground, var(--vscode-list-hoverBackground));
+}
+
+.ag-theme-alpine.ag-dnd-ghost {
+    background-color: var(--vscode-editorSuggestWidget-background);
+    opacity: 85%;
+
+    height: 35px !important;
+
+    color: var(--vscode-editorSuggestWidget-foreground);
+    font-family: var(--vscode-font-family);
+    font-size: calc(var(--vscode-font-size) - 2px);
+    font-weight: bold;
+    text-transform: uppercase;
+
+    border-color: var(--vscode-editorSuggestWidget-border);
+    border-radius: 0;
+
+    box-shadow: none;
+}
+
+.ag-theme-alpine .ag-row-hover {
+    background-color: var(--vscode-list-hoverBackground, var(--vscode-editor-inactiveSelectionBackground)) !important;
+    color: var(--vscode-list-hoverForeground, var(--vscode-editor-inactiveSelectionForeground)) !important
+}
+
+.ag-theme-alpine .ag-row-selected {
+    color: var(--vscode-list-activeSelectionForeground, var(--vscode-editor-selectionForeground)) !important;
+    background-color: var(--vscode-list-activeSelectionBackground, var(--vscode-editor-selectionBackground)) !important;
+}
+
+.ag-row:not(.ag-row-selected) > .ag-cell-focus {
+    background-color: var(--vscode-list-focusBackground) !important;
+    color: var(--vscode-list-focusForeground);
+}
+
+.ag-theme-alpine .ag-cell {
+    line-height: 30px;
+}
+
+.ag-theme-alpine .ag-pinned-right-header,
+.ag-theme-alpine .ag-pinned-right-cols-container {
+    border-left: 1px var(--vscode-editorGroup-border) solid;
+}
+
+.ag-theme-alpine .ag-pinned-left-header,
+.ag-theme-alpine .ag-pinned-left-cols-container {
+    border-right: 1px var(--vscode-editorGroup-border) solid;
+}

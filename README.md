@@ -1,42 +1,30 @@
+# Crumbs
+
+Crumbs is an extension for vscode that allows you to inspect packet traces without ever leaving your editor. The goal for Crumbs is to be able to open pcaps with Wiresharks dissection from within vscode and to prevent me from ending up with dozen of Wireshark windows and wasting time trying to find the correct one. Live capturing and any kind of editing pcaps is out of scope (at least for now).
+
+<br/>
+
 <p align="center">
-  <a href="" rel="noopener">
- <img style="margin-bottom: -30px" width=100px height=100px src="assets/icon.png" alt="Project logo"></a>
+  <img src="./demo.png" alt="VSCode running Crumbs" width="745">
 </p>
 
-<h1 align="center">Crumbs</h3>
+<br/>
 
-<p align="center"> Open Packet Traces in Visual Studio Code.
-    <br>
-</p>
+## Getting Started
+To provide Wiresharks dissection and amazing file compatibility, sharkd has to be installed.
 
-## Table of Contents
+```bash
+ # Fedora
+ sudo dnf install wireshark-cli
 
--   [About](#about)
--   [Getting Started](#getting_started)
--   [Usage](#usage)
-
-## About <a name = "about"></a>
-
-This Visual Studio Code extension adds support to open and inspect packet traces directly within the editor.
-
-## Getting Started <a name = "getting_started"></a>
-
-The following topic helps you to get started with Crumbs.
-### Prerequisites
-
-In order to work you have to install `sharkd (Wireshark)` on your system.
-
+ # Ubuntu
+ sudo apt install wireshark-common
 ```
-Ubuntu:
+After that you should be good to go!<br/>
+If not, please make sure that the correct path is used in the extensions sharkd setting.
 
-sudo apt install wireshark-common
+### Opening Trace Files
+Crumbs is already set as the default editor for a lot of file extensions. If your tracefile does not open the Frame List by default please check if the correct editor is selected and if your file type is actually [supported by Wireshark](https://gitlab.com/wireshark/wireshark/-/wikis/FileFormatReference).
 
-```
-
-After installing `sharkd` you should be good to go. If `sharkd` is installed on a different path or you want to use a specific version you are able set it in the `crumbs.sharkd` setting.
-
-To use this extension on Windows you need to use WSL with VSCode Remote.
-
-## Usage <a name="usage"></a>
-
-Just open any packet trace in Visual Studio Code. Crumbs should be set as default editor for those files. If not run the `View: Reopen Editor With...` command and select `Packet Editor` which is provided by Crumbs.
+### Windows
+Currently there is no way to run this extension directly under Windows. But it is possible to use Crumbs via WSL!
