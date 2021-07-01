@@ -5,7 +5,7 @@ import Document from "./document"
 import FrameTree from "./frameTree"
 
 export default class FrameListInstance {
-    private cancelReset: boolean
+    private stopReset: boolean
     private context: vscode.ExtensionContext
     private document: Document
     private resetMutex: Mutex
@@ -13,7 +13,7 @@ export default class FrameListInstance {
     private frameTree: FrameTree
 
     constructor(document: Document, webviewPanel: vscode.WebviewPanel, context: vscode.ExtensionContext, frameTree: FrameTree) {
-        this.cancelReset = false
+        this.stopReset = false
         this.context = context
         this.document = document
         this.resetMutex = new Mutex()
@@ -33,7 +33,7 @@ export default class FrameListInstance {
 
     async reset() {
         await this.resetMutex.runExclusive(async () => {
-            this.cancelReset = false
+            this.stopReset = false
             const columns: ConfigColumn[] = vscode.workspace.getConfiguration("crumbs").get("frameList.columns") || []
             const colorCoding: boolean = vscode.workspace.getConfiguration("crumbs").get("frameList.colorCoding") || false
             const message: FrameListInstanceResetMessage = { type: "frameListInstanceReset", columns: columns, colorCoding: colorCoding }
@@ -46,7 +46,7 @@ export default class FrameListInstance {
     async getFrames(columns: ConfigColumn[], skip: number = 0, limit: number = 5000) {
         const frames = await this.document.getFrames(columns, skip, limit)
 
-        if (frames.length !== 0 && !this.cancelReset) {
+        if (frames.length !== 0 && !this.stopReset) {
             const message: FrameListInstanceFramesMessage = { type: "frameListInstanceFrames", frames: frames }
             this.webviewPanel.webview.postMessage(message)
 
@@ -60,8 +60,6 @@ export default class FrameListInstance {
     private async onMessage(message: FrameListWebviewMessage) {
         switch (message.type) {
             case "frameListWebviewReady":
-                this.cancelReset = true
-                this.resetMutex.cancel()
                 this.reset()
                 break
             case "frameListWebviewFrameFocused":
@@ -83,6 +81,8 @@ export default class FrameListInstance {
 
     private onConfigure(event: vscode.ConfigurationChangeEvent) {
         if (event.affectsConfiguration("crumbs")) {
+            this.resetMutex.cancel()
+            this.stopReset = true 
             this.reset()
         }
     }

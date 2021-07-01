@@ -62,7 +62,10 @@ export default class FrameList extends React.Component {
             type: "frameListWebviewFrameFocused",
             frame: this.gridApi?.getDisplayedRowAtIndex(event.rowIndex || 0)?.data.frameNumber
         }
-        vscodeApi.postMessage(message)
+
+        if (message.frame) {
+            vscodeApi.postMessage(message)
+        }
     }
 
     private onCellKeyPress(event: CellKeyPressEvent) {
