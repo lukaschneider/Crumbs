@@ -18,6 +18,6 @@ export default class FrameTree {
     async reveal() {
         await this.frameTreeInstance.reveal(
             this.frameTreeDataProvider.getRootTreeItems()[0],
-            { expand: false, focus: true, select: false })
+            { expand: false, focus: false, select: false })
     }
 }
