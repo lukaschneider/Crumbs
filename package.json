@@ -2,7 +2,7 @@
     "name": "crumbs",
     "displayName": "Crumbs",
     "description": "Open Packet Traces in Visual Studio Code.",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "publisher": "lukaschneider",
     "icon": "icon.png",
     "capabilities": {

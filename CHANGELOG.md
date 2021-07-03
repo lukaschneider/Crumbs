@@ -2,7 +2,15 @@
 
 All notable changes to Crumbs will be documented here.
 
-## [0.1.1] - Tbd
+## [0.1.2] - 2021-07-03
+
+### Changed
+- Pressing enter doesn't automatically focus the Frame Tree Explorer anymore. This anoyed me...
+
+### Fixed
+- Sharkd should no longer crash when changing settings.
+
+## [0.1.1] - 2021-05-24
 React Rewrite 😎. This will make it easier to build upon in the future.
 
 ### Added
