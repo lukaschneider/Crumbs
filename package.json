@@ -29,6 +29,14 @@
     ],
     "main": "./out/extension.js",
     "contributes": {
+        "commands": [
+            {
+                "command": "crumbs.openActiveInWireshark",
+                "title": "Crumbs: Open Active Trace File in Wireshark",
+                "shortTitle": "Open Active Trace File in Wireshark",
+                "enablement": "crumbs.context.activeDocumentPath && crumbs.context.activeDocumentPath != "
+            }
+        ],
         "configuration": [
             {
                 "title": "Crumbs",
@@ -36,7 +44,13 @@
                     "crumbs.sharkd": {
                         "type": "string",
                         "default": "sharkd",
-                        "description": "The path to the sharkd binary.",
+                        "description": "Path to the sharkd binary.",
+                        "scope": "machine"
+                    },
+                    "crumbs.wireshark": {
+                        "type": "string",
+                        "default": "wireshark",
+                        "description": "Path to the wireshark binary.",
                         "scope": "machine"
                     },
                     "crumbs.frameList.columns": {
@@ -230,7 +244,7 @@
                     "id": "frameExplorer",
                     "title": "Frame Explorer",
                     "icon": "$(telescope)",
-                    "when": "crumbs.context.openDocumentsCount > 0"
+                    "when": "crumbs.context.activeDocumentCount > 0"
                 }
             ]
         },
@@ -242,7 +256,7 @@
                     "name": "Tree",
                     "icon": "$(list-tree)",
                     "type": "tree",
-                    "when": "crumbs.context.openDocumentsCount > 0"
+                    "when": "crumbs.context.activeDocumentCount > 0"
                 }
             ]
         },

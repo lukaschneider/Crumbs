@@ -1,6 +1,7 @@
 import * as vscode from "vscode"
 import { Mutex } from "async-mutex"
 
+import Context from "./context"
 import Document from "./document"
 import FrameTree from "./frameTree"
 
@@ -20,15 +21,16 @@ export default class FrameListInstance {
         this.webviewPanel = webviewPanel
         this.frameTree = frameTree
 
-        webviewPanel.webview.options = {
-            enableScripts: true,
-        }
-
-        webviewPanel.webview.html = this.generateWebviewHtml()
-
-        webviewPanel.webview.onDidReceiveMessage(this.onMessage.bind(this))
+        Context.setActiveDocumentPath(this.context, this.document.uri.path)
 
         vscode.workspace.onDidChangeConfiguration(this.onConfigure.bind(this))
+
+        webviewPanel.onDidChangeViewState(this.onDidChangeViewState.bind(this))
+        webviewPanel.onDidDispose(this.onDidDispose.bind(this))
+
+        webviewPanel.webview.options = { enableScripts: true }
+        webviewPanel.webview.html = this.generateWebviewHtml()
+        webviewPanel.webview.onDidReceiveMessage(this.onMessage.bind(this))
     }
 
     async reset() {
@@ -82,8 +84,20 @@ export default class FrameListInstance {
     private onConfigure(event: vscode.ConfigurationChangeEvent) {
         if (event.affectsConfiguration("crumbs")) {
             this.resetMutex.cancel()
-            this.stopReset = true 
+            this.stopReset = true
             this.reset()
+        }
+    }
+
+    private onDidChangeViewState(event: vscode.WebviewPanelOnDidChangeViewStateEvent) {
+        if (event.webviewPanel.active) {
+            Context.setActiveDocumentPath(this.context, this.document.uri.path)
+        }
+    }
+
+    private onDidDispose() {
+        if(Context.getActiveDocumentPath(this.context) == this.document.uri.path) {
+            Context.setActiveDocumentPath(this.context, "")
         }
     }
 

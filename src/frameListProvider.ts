@@ -1,5 +1,6 @@
 import * as vscode from "vscode"
 
+import Context from "./context"
 import Document from "./document"
 import FrameListInstance from "./frameListInstance"
 import FrameTree from "./frameTree"
@@ -22,12 +23,12 @@ export default class FrameListProvider implements vscode.CustomReadonlyEditorPro
     }
 
     openCustomDocument(uri: vscode.Uri): Document {
-        vscode.commands.executeCommand("setContext", "crumbs.context.openDocumentsCount", ++this.openDocumentsCount)
+        Context.setActiveDocumentCount(this.context, ++this.openDocumentsCount)
 
         const document = new Document(uri)
         document.onDispose(() => {
             if (this.openDocumentsCount > 0) {
-                vscode.commands.executeCommand("setContext", "crumbs.context.openDocumentsCount", --this.openDocumentsCount)
+                Context.setActiveDocumentCount(this.context, --this.openDocumentsCount)
             }
         })
 

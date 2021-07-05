@@ -2,6 +2,11 @@
 
 All notable changes to Crumbs will be documented here.
 
+## [0.1.3] - TBD
+
+### Added
+- New "Open Last Active Trace File in Wireshark" Command. For situations where Crumbs isn't enough.
+
 ## [0.1.2] - 2021-07-03
 
 ### Changed
