@@ -6,6 +6,7 @@ All notable changes to Crumbs will be documented here.
 
 ### Added
 - New "Open Last Active Trace File in Wireshark" Command. For situations where Crumbs isn't enough.
+- New Severity indication in the Frame Explorer. Makes it easier to find "Expert Infos".
 
 ## [0.1.2] - 2021-07-03
 
