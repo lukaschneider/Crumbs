@@ -1,6 +1,6 @@
-# Crumbs
+# About Crumbs
 
-Crumbs is an extension for vscode that allows you to inspect packet traces without ever leaving your editor. The goal for Crumbs is to be able to open pcaps with Wiresharks dissection from within vscode and to prevent me from ending up with dozen of Wireshark windows and wasting time trying to find the correct one. Live capturing and any kind of editing pcaps is out of scope (at least for now).
+Crumbs is an extension for vscode that allows you to inspect packet traces without ever leaving your editor. The goal for Crumbs is to be able to open pcaps with Wiresharks dissection from within vscode and to prevent you from ending up with dozen of Wireshark windows and wasting time trying to find the correct one. Live capturing and any kind of editing pcaps is out of scope (at least for now).
 
 <br/>
 
@@ -28,3 +28,7 @@ Crumbs is already set as the default editor for a lot of file extensions. If you
 
 ### Windows
 Currently there is no way to run this extension directly under Windows. But it is possible to use Crumbs via WSL!
+
+#
+
+<a href="https://www.buymeacoffee.com/lukaschneider" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
