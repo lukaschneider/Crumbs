@@ -38,11 +38,11 @@ module.exports = [
     }
   },
   {
-    entry: './src/webviews/src/index.tsx',
+    entry: './src/webviews/frameList/src/index.tsx',
     mode: 'none',
     output: {
       path: path.resolve(__dirname, 'out'),
-      filename: 'webview.js',
+      filename: 'frameList.js',
       libraryTarget: 'commonjs2'
     },
     devtool: 'nosources-source-map',
@@ -58,7 +58,7 @@ module.exports = [
             {
               loader: 'ts-loader',
               options: {
-                configFile: path.resolve(__dirname, 'src', 'webviews', 'tsconfig.json'),
+                configFile: path.resolve(__dirname, 'src', 'webviews', 'frameList', 'tsconfig.json'),
               }
             }
           ]
@@ -76,6 +76,50 @@ module.exports = [
       new webpack.ProvidePlugin({
         process: 'process/browser',
       }),
+    ],
+  },
+  {
+    entry: './src/webviews/frameHex/src/index.tsx',
+    mode: 'none',
+    output: {
+      path: path.resolve(__dirname, 'out'),
+      filename: 'frameHex.js',
+      libraryTarget: 'commonjs2'
+    },
+    devtool: 'nosources-source-map',
+    resolve: {
+      extensions: ['.ts', '.js', '.tsx'],
+    },
+    module: {
+      rules: [
+        {
+          test: /\.ts*/,
+          exclude: /node_modules/,
+          use: [
+            {
+              loader: 'ts-loader',
+              options: {
+                configFile: path.resolve(__dirname, 'src', 'webviews', 'frameHex', 'tsconfig.json'),
+              }
+            }
+          ]
+        },
+        {
+          test: /\.css$/,
+          use: [
+            'style-loader',
+            'css-loader',
+          ]
+        }
+      ],
+    },
+    plugins: [
+      new webpack.ProvidePlugin({
+        process: 'process/browser',
+      }),
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+      })
     ],
   }
 ];

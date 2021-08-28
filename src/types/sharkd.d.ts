@@ -14,6 +14,7 @@ interface SharkdGetFrameTreeRequest {
     req: "frame"
     frame: number
     proto: 1
+    bytes: 1
 }
 
 interface SharkdFrame {
@@ -27,9 +28,10 @@ interface SharkdFrame {
     fg: string
 }
 
-interface SharkdFrameTreeResponse {
+interface SharkdFrameResponse {
     err: number
     tree: SharkdFrameTreeNode[]
+    bytes: string
 }
 
 interface SharkdFrameTreeNode {

@@ -1,0 +1,16 @@
+#root {
+    font-family: var(--vscode-editor-font-family);
+    color: var(--vscode-foreground);
+    line-height: 22px;
+    white-space: nowrap;
+}
+
+p {
+    font-family: var(--vscode-font-family);
+}
+
+.field {
+    display: inline-block;
+    min-width: 15px;
+    margin-left: 5px;
+}

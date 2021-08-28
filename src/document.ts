@@ -68,13 +68,14 @@ export default class Document extends vscode.Disposable implements vscode.Custom
         ))
     }
 
-    async getFrameTree(frame: number) {
-        const response = await this.request<SharkdGetFrameTreeRequest, SharkdFrameTreeResponse>({
+    async getFrame(frame: number) {
+        const response = await this.request<SharkdGetFrameTreeRequest, SharkdFrameResponse>({
             req: "frame",
             frame: frame,
-            proto: 1
+            proto: 1,
+            bytes: 1
         })
-        return response.tree
+        return response
     }
 
     private request<RequestType, ResponseType>(request: RequestType): Promise<ResponseType> {

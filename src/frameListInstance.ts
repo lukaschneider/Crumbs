@@ -4,6 +4,7 @@ import { Mutex } from "async-mutex"
 import Context from "./context"
 import Document from "./document"
 import FrameTree from "./frameTree"
+import FrameHexProvider from "./frameHexProvider"
 
 export default class FrameListInstance {
     private stopReset: boolean
@@ -11,14 +12,16 @@ export default class FrameListInstance {
     private document: Document
     private resetMutex: Mutex
     private webviewPanel: vscode.WebviewPanel
+    private frameHexProvider: FrameHexProvider
     private frameTree: FrameTree
 
-    constructor(document: Document, webviewPanel: vscode.WebviewPanel, context: vscode.ExtensionContext, frameTree: FrameTree) {
+    constructor(document: Document, webviewPanel: vscode.WebviewPanel, context: vscode.ExtensionContext, frameHexProvider: FrameHexProvider, frameTree: FrameTree) {
         this.stopReset = false
         this.context = context
         this.document = document
         this.resetMutex = new Mutex()
         this.webviewPanel = webviewPanel
+        this.frameHexProvider = frameHexProvider
         this.frameTree = frameTree
 
         Context.setActiveDocumentPath(this.context, this.document.uri.path)
@@ -65,10 +68,10 @@ export default class FrameListInstance {
                 this.reset()
                 break
             case "frameListWebviewFrameFocused":
-                const frame = (message as FrameListWebviewFrameFocusedMessage).frame
-                this.frameTree.frameTreeDataProvider.setFrameTreeData(
-                    await this.document.getFrameTree(frame)
-                )
+                const frameNumber = (message as FrameListWebviewFrameFocusedMessage).frame
+                const frame = await this.document.getFrame(frameNumber)
+                this.frameTree.frameTreeDataProvider.setFrameTreeData(frame.tree)
+                this.frameHexProvider.setBuffer(frame.bytes)
                 break
             case "frameListWebviewRevealFrameTree":
                 await this.frameTree.reveal()
@@ -103,7 +106,7 @@ export default class FrameListInstance {
 
     private generateWebviewHtml(): string {
         const scriptUri = this.webviewPanel.webview.asWebviewUri(
-            vscode.Uri.joinPath(this.context.extensionUri, "out", "webview.js")
+            vscode.Uri.joinPath(this.context.extensionUri, "out", "frameList.js")
         )
 
         return `
