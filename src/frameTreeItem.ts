@@ -15,5 +15,20 @@ export default class FrameTreeItem extends vscode.TreeItem {
         this.id = `${parent?.id}-${node.e}-${index}`
         this.parent = parent
         this.children = node.n || []
+
+        switch(node.s) {
+            case "Chat":
+                this.iconPath = new vscode.ThemeIcon("comment-discussion", new vscode.ThemeColor("terminal.ansiBlue"))
+                break
+            case "Note":
+                this.iconPath = new vscode.ThemeIcon("note", new vscode.ThemeColor("terminal.ansiCyan"))
+                break
+            case "Warning":
+                this.iconPath = new vscode.ThemeIcon("warning", new vscode.ThemeColor("terminal.ansiYellow"))
+                break
+            case "Error":
+                this.iconPath = new vscode.ThemeIcon("error", new vscode.ThemeColor("terminal.ansiRed"))
+                break
+        }
     }
 }

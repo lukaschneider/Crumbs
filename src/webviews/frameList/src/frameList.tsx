@@ -3,7 +3,7 @@ import { ColumnApi, ColDef, GridApi, GridReadyEvent, RowNode, CellFocusedEvent, 
 import { AgGridReact } from "ag-grid-react"
 import { zipObject } from "lodash"
 
-import { vscodeApi } from "./vscodeApi"
+import { vscodeApi } from "../../vscodeApi"
 
 import "ag-grid-community/dist/styles/ag-grid.css"
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"
