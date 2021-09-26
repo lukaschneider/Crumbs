@@ -32,8 +32,8 @@
         "commands": [
             {
                 "command": "crumbs.openActiveInWireshark",
-                "title": "Crumbs: Open Active Trace File in Wireshark",
-                "shortTitle": "Open Active Trace File in Wireshark",
+                "title": "Crumbs: Open Last Active Trace File in Wireshark",
+                "shortTitle": "Open Last Active Trace File in Wireshark",
                 "enablement": "crumbs.context.activeDocumentPath && crumbs.context.activeDocumentPath != "
             }
         ],
