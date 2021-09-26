@@ -3,6 +3,9 @@
 All notable changes to Crumbs will be documented here.
 ## [0.1.4] - tbd
 
+### Changed
+- Disabled the contextmenu on the FrameList. The context menu is an 'Enterprise' feature of AGGrid and I can therefore not make use of it properly.
+
 ## [0.1.3] - 2021-08-28
 Some Quality updates and an initial Hex View 🎉. In the future this new Hex View should idealy be able to focus things in the Tree View and vice versa and live in more crumbled places too.
 
