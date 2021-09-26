@@ -3,6 +3,9 @@
 All notable changes to Crumbs will be documented here.
 ## [0.1.4] - tbd
 
+### Added
+- MacOS 'Getting Started' instructions. Revived my old Macbook. Works as expected 😁.
+
 ### Changed
 - Disabled the contextmenu on the FrameList. The context menu is an 'Enterprise' feature of AGGrid and I can therefore not make use of it properly.
 

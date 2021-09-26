@@ -19,7 +19,11 @@ To provide Wiresharks dissection and amazing file compatibility, sharkd has to b
 
  # Ubuntu
  sudo apt install wireshark-common
+
+ # MacOS
+ brew install wireshark
 ```
+
 After that you should be good to go!<br/>
 If not, please make sure that the correct path is used in the extensions sharkd setting.
 
