@@ -1,11 +1,14 @@
 /* Messages from Frame Hex Instance to Frame Hex Webview */
 interface FrameHexInstanceMessage {
-    type: "frameHexInstanceSetBuffer"
+    type: "frameHexInstanceReset"
 }
 
-interface FrameHexInstanceSetBufferMessage extends FrameHexInstanceMessage {
-    type: "frameHexInstanceSetBuffer",
-    buffer: string
+interface FrameHexInstanceResetMessage extends FrameHexInstanceMessage {
+    type: "frameHexInstanceReset",
+    buffer: string,
+    byteRanges: SharkdByteRange[],
+    rowLength: number,
+    setLength: number,
 }
 
 /* Messages from Frame Hex Webview to Frame Hex Instance */

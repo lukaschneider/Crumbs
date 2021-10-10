@@ -132,6 +132,16 @@
                         "type": "integer",
                         "default": 5000,
                         "description": "To minimise performance problems and provide information as quickly as possible, Crumbs divides trace files into chunks while loading."
+                    },
+                    "crumbs.frameHex.rowLength": {
+                        "type": "integer",
+                        "default": "16",
+                        "description": "The number of bytes to display in a row."
+                    },
+                    "crumbs.frameHex.setLength": {
+                        "type": "integer",
+                        "default": "8",
+                        "description": "The number of bytes after a row should be split."
                     }
                 }
             }

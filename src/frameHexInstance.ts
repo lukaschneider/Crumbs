@@ -13,8 +13,14 @@ export default class FrameHexInstance {
         webviewView.webview.onDidReceiveMessage(this.onMessage.bind(this))
     }
 
-    setBuffer(buffer: string) {
-        const message: FrameHexInstanceSetBufferMessage = {type: "frameHexInstanceSetBuffer", buffer: buffer}
+    reset(buffer: string, byteRanges: SharkdByteRange[]) {
+        const message: FrameHexInstanceResetMessage = {
+            type: "frameHexInstanceReset",
+            buffer: buffer,
+            byteRanges: byteRanges,
+            rowLength: vscode.workspace.getConfiguration("crumbs").get("frameHex.rowLength") ?? 16,
+            setLength: vscode.workspace.getConfiguration("crumbs").get("frameHex.setLength") ?? 8,
+        }
         this.webviewView.webview.postMessage(message)
     }
 

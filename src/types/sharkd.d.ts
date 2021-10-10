@@ -28,10 +28,13 @@ interface SharkdFrame {
     fg: string
 }
 
+type SharkdByteRange = [number, number]
+
 interface SharkdFrameResponse {
     err: number
     tree: SharkdFrameTreeNode[]
-    bytes: string
+    bytes: string,
+    byteRanges: SharkdByteRange[]
 }
 
 interface SharkdFrameTreeNode {
@@ -45,6 +48,8 @@ interface SharkdFrameTreeNode {
     e?: number
     /** Array of Subree Nodes */
     n?: SharkdFrameTreeNode[]
+    /** Item start, Item length */
+    h?: SharkdByteRange
     /** Severity */
     s?: "Chat" | "Note" | "Warning" | "Error"
 }

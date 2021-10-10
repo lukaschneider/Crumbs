@@ -5,6 +5,7 @@ import { Socket } from "net"
 import { Mutex } from "async-mutex"
 import { URL as url } from "url"
 import { v4 as uuid } from "uuid"
+import { isEqual, uniqWith } from "lodash"
 
 export default class Document extends vscode.Disposable implements vscode.CustomDocument {
     uri: vscode.Uri
@@ -75,6 +76,15 @@ export default class Document extends vscode.Disposable implements vscode.Custom
             proto: 1,
             bytes: 1
         })
+
+        response.byteRanges = []
+        const getByteRanges = (node: SharkdFrameTreeNode) => {
+            if (node.n) node.n.map(getByteRanges)
+            if (node.h) response.byteRanges.push(node.h)
+        }
+        response.tree.map(getByteRanges)
+        response.byteRanges = uniqWith(response.byteRanges, isEqual)
+
         return response
     }
 

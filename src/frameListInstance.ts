@@ -71,7 +71,7 @@ export default class FrameListInstance {
                 const frameNumber = (message as FrameListWebviewFrameFocusedMessage).frame
                 const frame = await this.document.getFrame(frameNumber)
                 this.frameTree.frameTreeDataProvider.setFrameTreeData(frame.tree)
-                this.frameHexProvider.setBuffer(frame.bytes)
+                this.frameHexProvider.reset(frame.bytes, frame.byteRanges)
                 break
             case "frameListWebviewRevealFrameTree":
                 await this.frameTree.reveal()
