@@ -35,7 +35,7 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
         return rows.map((row, rowIndex) => {
             return <div className="container">
                 <div className="row_header">{("0000" + this.state.rowLength * rowIndex).slice(-4)}</div>
-                <div className={classNames("container", {row_wrap: this.state.enableRowWrap})}>
+                <div className={classNames("container", { row_wrap: this.state.enableRowWrap })}>
                     <div className="container hex_body">
                         {
                             row.map(field => <div className="field">{this.getHexValue(field.byte ?? -1)}</div>)
@@ -117,7 +117,7 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
 
         // Fill last row to full rowLength
         for (let i = rows[rows.length - 1].length; i < rows[0].length; i++) {
-            rows[rows.length - 1].push({fieldIndex: i})
+            rows[rows.length - 1].push({ fieldIndex: i })
         }
 
         return rows
@@ -141,7 +141,7 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
         }
         return indexes
     }
-    
+
     private onHover(index: number) {
         this.setState({
             hoveredRange: this.getRelatedIndexes(index)
@@ -167,4 +167,3 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
         }
     }
 }
-

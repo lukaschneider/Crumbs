@@ -15,6 +15,8 @@ export default class FrameHexProvider implements vscode.WebviewViewProvider {
         vscode.window.registerWebviewViewProvider("crumbs.frameHex", this, {
             webviewOptions: { retainContextWhenHidden: true }
         })
+
+        vscode.workspace.onDidChangeConfiguration(this.onConfigure.bind(this))
     }
 
     resolveWebviewView(
@@ -29,5 +31,10 @@ export default class FrameHexProvider implements vscode.WebviewViewProvider {
     reset(buffer: string, byteRanges: SharkdByteRange[]) {
         this.instance?.reset(buffer, byteRanges)
         this.currentBuffer = buffer
+        this.currentByteRanges = byteRanges
+    }
+
+    private onConfigure() {
+        this.instance?.reset(this.currentBuffer, this.currentByteRanges)
     }
 }
