@@ -9,6 +9,7 @@ interface FrameHexInstanceResetMessage extends FrameHexInstanceMessage {
     byteRanges: SharkdByteRange[],
     rowLength: number,
     setLength: number,
+    enableRowWrap: boolean
 }
 
 /* Messages from Frame Hex Webview to Frame Hex Instance */

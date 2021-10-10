@@ -14,6 +14,7 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
             byteRanges: [],
             rowLength: 16,
             setLength: 8,
+            enableRowWrap: true,
         }
     }
 
@@ -34,7 +35,7 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
         return rows.map((row, rowIndex) => {
             return <div className="container">
                 <div className="row_header">{("0000" + this.state.rowLength * rowIndex).slice(-4)}</div>
-                <div className="container row_body">
+                <div className={classNames("container", {row_wrap: this.state.enableRowWrap})}>
                     <div className="container hex_body">
                         {
                             row.map(field => <div className="field">{this.getHexValue(field.byte ?? -1)}</div>)
@@ -161,6 +162,7 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
                     byteRanges: (message.data as FrameHexInstanceResetMessage).byteRanges,
                     rowLength: (message.data as FrameHexInstanceResetMessage).rowLength,
                     setLength: (message.data as FrameHexInstanceResetMessage).setLength,
+                    enableRowWrap: (message.data as FrameHexInstanceResetMessage).enableRowWrap,
                 })
         }
     }

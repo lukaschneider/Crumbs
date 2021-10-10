@@ -20,6 +20,7 @@ export default class FrameHexInstance {
             byteRanges: byteRanges,
             rowLength: vscode.workspace.getConfiguration("crumbs").get("frameHex.rowLength") ?? 16,
             setLength: vscode.workspace.getConfiguration("crumbs").get("frameHex.setLength") ?? 8,
+            enableRowWrap: vscode.workspace.getConfiguration("crumbs").get("frameHex.rowWrap") ?? true,
         }
         this.webviewView.webview.postMessage(message)
     }

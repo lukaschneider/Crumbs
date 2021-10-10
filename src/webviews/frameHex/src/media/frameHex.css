@@ -15,7 +15,7 @@ p {
     cursor: default;
 }
 
-.row_body {
+.row_wrap {
     flex-wrap: wrap;
 }
 

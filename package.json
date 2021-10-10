@@ -142,6 +142,11 @@
                         "type": "integer",
                         "default": "8",
                         "description": "The number of bytes after a row should be split."
+                    },
+                    "crumbs.frameHex.rowWrap": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "When enabled the ascii values will wrap below the hex values if not enough space is available."
                     }
                 }
             }

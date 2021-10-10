@@ -11,6 +11,7 @@ interface FrameHexState {
     hoveredRange?: number[]
     /** @description byteIndexes which should be highlighted as selected */
     selectedRange?: number[]
+    enableRowWrap: boolean
 }
 
 interface FrameHexField {
