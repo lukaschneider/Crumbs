@@ -8,9 +8,9 @@ interface FrameHexState {
     rowLength: number
     setLength: number
     /** @description byteIndexes which should be highlighted as hovered */
-    hoveredRange?: number[]
+    hoveredRange: number[]
     /** @description byteIndexes which should be highlighted as selected */
-    selectedRange?: number[]
+    selectedRange: number[]
     enableRowWrap: boolean
 }
 

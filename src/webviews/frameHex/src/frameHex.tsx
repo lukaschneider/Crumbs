@@ -15,6 +15,8 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
             rowLength: 16,
             setLength: 8,
             enableRowWrap: true,
+            selectedRange: [],
+            hoveredRange: []
         }
     }
 
@@ -32,30 +34,92 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
 
         const rows = this.setHightlights(this.getRows())
 
-        return rows.map((row, rowIndex) => {
-            return <div className="container">
-                <div className="row_header">{("0000" + this.state.rowLength * rowIndex).slice(-4)}</div>
-                <div className={classNames("container", { row_wrap: this.state.enableRowWrap })}>
-                    <div className="container hex_body">
-                        {
-                            row.map(field => <div className="field">{this.getHexValue(field.byte ?? -1)}</div>)
-                        }
+        return <div
+            id="hex_view"
+            onMouseOver={() => this.onHover(-1)}
+            onMouseLeave={() => this.onHover(-1)}
+            onClick={() => this.onSelect(-1)}
+        >
+            {
+                rows.map((row, rowIndex) => {
+                    return <div className="container">
+                        <div className="row_header">{("0000" + this.state.rowLength * rowIndex).slice(-4)}</div>
+                        <div className={classNames("container", { row_wrap: this.state.enableRowWrap })}>
+                            <div className="container hex_body">
+                                {
+                                    row.map(field => {
+                                        const hexValue = this.getHexValue(field.byte ?? -1)
+                                        return <div
+                                            className={
+                                                classNames("field", {
+                                                    clickable: field.byteIndex != undefined,
+                                                    hovered: field.hovered,
+                                                    selected: field.selected
+                                                })
+                                            }
+                                            onMouseOver={(e) => {
+                                                e.stopPropagation()
+                                                this.onHover(field.byteIndex ?? -1)
+                                            }}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                this.onSelect(field.byteIndex ?? -1)
+                                            }}
+                                        >
+                                            {hexValue}
+                                        </div>
+                                    })
+                                }
+                            </div>
+                            <div className="container">
+                                {
+                                    row.map(field => {
+                                        const asciiValue = this.getAsciiValue(field.byte ?? -1)
+                                        return <div
+                                            className={
+                                                classNames("field", {
+                                                    clickable: field.byteIndex != undefined,
+                                                    deemphasized: asciiValue == "·",
+                                                    hovered: field.hovered,
+                                                    selected: field.selected
+                                                })
+                                            }
+                                            onMouseOver={(e) => {
+                                                e.stopPropagation()
+                                                this.onHover(field.byteIndex ?? -1)
+                                            }}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                this.onSelect(field.byteIndex ?? -1)
+                                            }}
+                                        >
+                                            {asciiValue}
+                                        </div>
+                                    })
+                                }
+                            </div>
+                        </div>
                     </div>
-                    <div className="container">
-                        {
-                            row.map(field => {
-                                const asciiValue = this.getAsciiValue(field.byte ?? -1)
-                                return <div className={classNames("field", { dimmed_field: asciiValue == "·" })}>{asciiValue}</div>
-                            })
-                        }
-                    </div>
-                </div>
-            </div>
-        })
+                })
+            }
+        </div>
     }
 
     private setHightlights(rows: FrameHexRows) {
-        return rows
+        return rows.map(row => row.map(field => {
+            if (field.byteIndex == undefined) {
+                return field
+            }
+            if (this.state.selectedRange.indexOf(field.byteIndex) !== -1) {
+                return { ...field, hovered: false, selected: true }
+            }
+            else if (this.state.hoveredRange.indexOf(field.byteIndex) !== -1) {
+                return { ...field, hovered: true, selected: false }
+            }
+            else {
+                return { ...field, hovered: false, selected: false }
+            }
+        }))
     }
 
     private getHexValue(byte: number) {

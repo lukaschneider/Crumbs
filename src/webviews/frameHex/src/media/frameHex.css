@@ -9,6 +9,10 @@ p {
     font-family: var(--vscode-font-family);
 }
 
+#hex_view {
+    height: 100vh;
+}
+
 .container {
     display: flex;
     cursor: default;
@@ -18,12 +22,12 @@ p {
     flex-wrap: wrap;
 }
 
-.hex_body {
+.row_header {
+    color: var(--vscode-editorLineNumber-foreground);
     margin-right: 22px;
 }
 
-.row_header {
-    color: var(--vscode-editorLineNumber-foreground);
+.hex_body {
     margin-right: 22px;
 }
 
@@ -32,6 +36,18 @@ p {
     text-align: center;
 }
 
-.dimmed_field {
+.clickable {
+    cursor: pointer;
+}
+
+.deemphasized {
     color: var(--vscode-list-deemphasizedForeground);
+}
+
+.hovered {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
 }
