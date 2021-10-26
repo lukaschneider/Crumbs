@@ -2,6 +2,7 @@ import * as vscode from "vscode"
 
 export default class FrameTreeItem extends vscode.TreeItem {
     parent?: FrameTreeItem
+    byteRange?: SharkdByteRange
     children: SharkdFrameTreeNode[]
 
     constructor(node: SharkdFrameTreeNode, index: number, parent?: FrameTreeItem) {
@@ -14,6 +15,7 @@ export default class FrameTreeItem extends vscode.TreeItem {
 
         this.id = `${parent?.id}-${node.e}-${index}`
         this.parent = parent
+        this.byteRange = node.h
         this.children = node.n || []
 
         switch(node.s) {

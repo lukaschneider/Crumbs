@@ -3,6 +3,7 @@
     color: var(--vscode-foreground);
     line-height: 22px;
     white-space: nowrap;
+    user-select: none;
 }
 
 p {
@@ -45,9 +46,11 @@ p {
 }
 
 .hovered {
+    color: var(--vscode-list-hoverForeground);
     background-color: var(--vscode-list-hoverBackground);
 }
 
 .selected {
+    color: var(--vscode-list-activeSelectionForeground);
     background-color: var(--vscode-list-activeSelectionBackground);
 }

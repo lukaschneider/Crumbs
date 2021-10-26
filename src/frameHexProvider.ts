@@ -28,6 +28,10 @@ export default class FrameHexProvider implements vscode.WebviewViewProvider {
         this.reset(this.currentBuffer, this.currentByteRanges)
     }
 
+    select(byteRange: SharkdByteRange) {
+        this.instance?.select(byteRange)
+    }
+
     reset(buffer: string, byteRanges: SharkdByteRange[]) {
         this.instance?.reset(buffer, byteRanges)
         this.currentBuffer = buffer

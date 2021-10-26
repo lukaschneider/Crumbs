@@ -13,6 +13,14 @@ export default class FrameHexInstance {
         webviewView.webview.onDidReceiveMessage(this.onMessage.bind(this))
     }
 
+    select(byteRange: SharkdByteRange) {
+        const message: FrameHexInstanceSelectMessage = {
+            type: "frameHexInstanceSelect",
+            byteRange: byteRange
+        }
+        this.webviewView.webview.postMessage(message)
+    }
+
     reset(buffer: string, byteRanges: SharkdByteRange[]) {
         const message: FrameHexInstanceResetMessage = {
             type: "frameHexInstanceReset",

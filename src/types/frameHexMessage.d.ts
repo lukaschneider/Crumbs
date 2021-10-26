@@ -1,6 +1,11 @@
 /* Messages from Frame Hex Instance to Frame Hex Webview */
 interface FrameHexInstanceMessage {
-    type: "frameHexInstanceReset"
+    type: "frameHexInstanceReset" | "frameHexInstanceSelect"
+}
+
+interface FrameHexInstanceSelectMessage extends FrameHexInstanceMessage {
+    type: "frameHexInstanceSelect",
+    byteRange: SharkdByteRange
 }
 
 interface FrameHexInstanceResetMessage extends FrameHexInstanceMessage {

@@ -188,17 +188,26 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
     }
 
     private getRelatedIndexes(index: number) {
-        let range: number[] = []
+        let range: SharkdByteRange
         this.state.byteRanges.map(x => {
             // Check bounds
             if (index >= x[0] && index <= x[0] + x[1] - 1) {
                 // Set lowest value
-                if (x[1] - x[0] < range[1] - range[0] || range.length === 0) {
+                if (range === undefined || x[1] - x[0] < range[1] - range[0]) {
                     range = x
                 }
             }
         })
 
+        // @ts-ignore ..."Variable 'range' is used before being assigned." ... no shit sherlock
+        if (range === undefined) {
+            return []
+        }
+        
+        return this.getIndexesFromRange(range)
+    }
+
+    private getIndexesFromRange(range: SharkdByteRange) {
         let indexes: number[] = []
         for (let index = range[0]; index < range[0] + range[1]; index++) {
             indexes.push(index)
@@ -228,6 +237,12 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
                     setLength: (message.data as FrameHexInstanceResetMessage).setLength,
                     enableRowWrap: (message.data as FrameHexInstanceResetMessage).enableRowWrap,
                 })
+                break
+            case "frameHexInstanceSelect":
+                this.setState({
+                    selectedRange: this.getIndexesFromRange((message.data as FrameHexInstanceSelectMessage).byteRange)
+                })
+                break
         }
     }
 }
