@@ -23,6 +23,9 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
     componentDidMount() {
         window.addEventListener("message", this.onMessage.bind(this))
 
+        // Disable ContextMenu for now as it has nothing usefull in it.
+        document.addEventListener("contextmenu", e => {e.preventDefault()})
+
         const message: FrameHexWebviewReadyMessage = { type: "frameHexWebviewReady" }
         vscodeApi.postMessage(message)
     }
@@ -187,7 +190,7 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
         return rows
     }
 
-    private getRelatedIndexes(index: number) {
+    private getRangeAtIndex(index: number): SharkdByteRange {
         let range: SharkdByteRange
         this.state.byteRanges.map(x => {
             // Check bounds
@@ -199,12 +202,16 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
             }
         })
 
-        // @ts-ignore ..."Variable 'range' is used before being assigned." ... no shit sherlock
+        // @ts-ignore ...
         if (range === undefined) {
-            return []
+            return [0, 0]
         }
-        
-        return this.getIndexesFromRange(range)
+
+        return range
+    }
+
+    private getIndexesOfRangeAtIndex(index: number) {
+        return this.getIndexesFromRange(this.getRangeAtIndex(index))
     }
 
     private getIndexesFromRange(range: SharkdByteRange) {
@@ -217,14 +224,17 @@ export default class FrameHex extends React.Component<FrameHexProps, FrameHexSta
 
     private onHover(index: number) {
         this.setState({
-            hoveredRange: this.getRelatedIndexes(index)
+            hoveredRange: this.getIndexesOfRangeAtIndex(index)
         })
     }
 
     private onSelect(index: number) {
         this.setState({
-            selectedRange: this.getRelatedIndexes(index)
+            selectedRange: this.getIndexesOfRangeAtIndex(index)
         })
+
+        const message: FrameHexWebviewSelectMessage = { type: "frameHexWebviewSelect", byteRange: this.getRangeAtIndex(index) }
+        vscodeApi.postMessage(message)
     }
 
     private onMessage(message: MessageEvent<FrameHexInstanceMessage>) {

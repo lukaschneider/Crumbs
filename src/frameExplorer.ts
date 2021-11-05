@@ -9,9 +9,6 @@ export default class FrameExplorer {
     frameTreeInstance: vscode.TreeView<FrameTreeItem>
 
     constructor(context: vscode.ExtensionContext) {
-        // FrameHex
-        this.frameHexProvider = new FrameHexProvider(context)
-
         // FrameTree
         this.frameTreeDataProvider = new FrameTreeDataProvider()
         this.frameTreeInstance = vscode.window.createTreeView("crumbs.frameTree", {
@@ -20,12 +17,23 @@ export default class FrameExplorer {
             canSelectMany: false,
         })
         this.frameTreeInstance.onDidChangeSelection(this.frameTreeInstanceSelectionChanged.bind(this))
+
+        // FrameHex
+        this.frameHexProvider = new FrameHexProvider(context, this.focusFrameTreeItemAtRange.bind(this))
     }
 
     async reveal() {
         await this.frameTreeInstance.reveal(
             this.frameTreeDataProvider.getRootTreeItems()[0],
             { expand: false, focus: false, select: false })
+    }
+
+    private focusFrameTreeItemAtRange(range: SharkdByteRange) {
+        const treeItem = this.frameTreeDataProvider.getTreeItemAtRange(range)
+
+        if(treeItem) {
+            this.frameTreeInstance.reveal(treeItem, { expand: false, focus: true, select: true })
+        }
     }
 
     private frameTreeInstanceSelectionChanged(event: vscode.TreeViewSelectionChangeEvent<FrameTreeItem>) {

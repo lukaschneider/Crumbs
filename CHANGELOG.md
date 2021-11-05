@@ -6,7 +6,7 @@ All notable changes to Crumbs will be documented here.
 ### Added
 - MacOS "Getting Started" instructions. Revived my old Macbook. Works as expected 😁.
 - Option to disable rowWrapping in the new FrameHex view.
-- Selecting a field in the FrameTree now selects the bytes in the FrameHex View.
+- Selecting a field in the FrameTree now selects the bytes in the FrameHex View and vice versa.
 
 ### Changed
 - Disabled the contextmenu on the FrameList. The context menu is an "Enterprise" feature of AGGrid and I can therefore not make use of it properly.

@@ -6,11 +6,13 @@ export default class FrameHexProvider implements vscode.WebviewViewProvider {
     private instance?: FrameHexInstance
     private currentBuffer: string
     private currentByteRanges: SharkdByteRange[]
+    private focusFrameTreeItemAtRange: Function
 
-    constructor(context: vscode.ExtensionContext) {
+    constructor(context: vscode.ExtensionContext, focusFrameTreeItemAtRange: Function) {
         this.context = context
         this.currentBuffer = ""
         this.currentByteRanges = []
+        this.focusFrameTreeItemAtRange = focusFrameTreeItemAtRange
 
         vscode.window.registerWebviewViewProvider("crumbs.frameHex", this, {
             webviewOptions: { retainContextWhenHidden: true }
@@ -19,12 +21,8 @@ export default class FrameHexProvider implements vscode.WebviewViewProvider {
         vscode.workspace.onDidChangeConfiguration(this.onConfigure.bind(this))
     }
 
-    resolveWebviewView(
-        webviewView: vscode.WebviewView,
-        webviewResolveContext: vscode.WebviewViewResolveContext,
-        token: vscode.CancellationToken
-    ) {
-        this.instance = new FrameHexInstance(this.context, webviewView, webviewResolveContext, token)
+    resolveWebviewView(webviewView: vscode.WebviewView) {
+        this.instance = new FrameHexInstance(this.context, webviewView, this.focusFrameTreeItemAtRange)
         this.reset(this.currentBuffer, this.currentByteRanges)
     }
 

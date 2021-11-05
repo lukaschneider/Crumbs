@@ -3,10 +3,12 @@ import * as vscode from "vscode"
 export default class FrameHexInstance {
     private context: vscode.ExtensionContext
     private webviewView: vscode.WebviewView
+    private focusFrameTreeItemAtRange: Function
 
-    constructor(context: vscode.ExtensionContext, webviewView: vscode.WebviewView, webviewResolveContext: vscode.WebviewViewResolveContext, token: vscode.CancellationToken) {
+    constructor(context: vscode.ExtensionContext, webviewView: vscode.WebviewView, focusFrameTreeItemAtRange: Function) {
         this.context = context
         this.webviewView = webviewView
+        this.focusFrameTreeItemAtRange = focusFrameTreeItemAtRange
 
         webviewView.webview.options = { enableScripts: true }
         webviewView.webview.html = this.generateWebviewHtml()
@@ -36,6 +38,10 @@ export default class FrameHexInstance {
     private onMessage(message: FrameHexWebviewMessage) {
         switch (message.type) {
             case "frameHexWebviewReady":
+                // Woah you are actually looking through my code! Thanks :D
+                break;
+            case "frameHexWebviewSelect":
+                this.focusFrameTreeItemAtRange((message as FrameHexWebviewSelectMessage).byteRange)
                 break;
         }
     }
