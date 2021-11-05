@@ -1,7 +1,10 @@
 # Change Log
 
 All notable changes to Crumbs will be documented here.
-## [0.1.4] - tbd
+## [0.1.5] - tbd
+
+## [0.1.4] - 2021-11-05
+Finally a fully functional Hex View - with selection and settings. Next up will be (FINALLY) the option to set display filters.
 
 ### Added
 - MacOS "Getting Started" instructions. Revived my old Macbook. Works as expected 😁.
