@@ -1,18 +1,32 @@
 /* Messages from Frame Hex Instance to Frame Hex Webview */
 interface FrameHexInstanceMessage {
-    type: "frameHexInstanceSetBuffer"
+    type: "frameHexInstanceReset" | "frameHexInstanceSelect"
 }
 
-interface FrameHexInstanceSetBufferMessage extends FrameHexInstanceMessage {
-    type: "frameHexInstanceSetBuffer",
-    buffer: string
+interface FrameHexInstanceSelectMessage extends FrameHexInstanceMessage {
+    type: "frameHexInstanceSelect",
+    byteRange: SharkdByteRange
+}
+
+interface FrameHexInstanceResetMessage extends FrameHexInstanceMessage {
+    type: "frameHexInstanceReset",
+    buffer: string,
+    byteRanges: SharkdByteRange[],
+    rowLength: number,
+    setLength: number,
+    enableRowWrap: boolean
 }
 
 /* Messages from Frame Hex Webview to Frame Hex Instance */
 interface FrameHexWebviewMessage {
-    type: "frameHexWebviewReady"
+    type: "frameHexWebviewReady" | "frameHexWebviewSelect"
 }
 
 interface FrameHexWebviewReadyMessage extends FrameHexWebviewMessage {
     type: "frameHexWebviewReady"
+}
+
+interface FrameHexWebviewSelectMessage extends FrameHexWebviewMessage {
+    type: "frameHexWebviewSelect",
+    byteRange: SharkdByteRange
 }

@@ -3,8 +3,7 @@ import { Mutex } from "async-mutex"
 
 import Context from "./context"
 import Document from "./document"
-import FrameTree from "./frameTree"
-import FrameHexProvider from "./frameHexProvider"
+import FrameExplorer from "./frameExplorer"
 
 export default class FrameListInstance {
     private stopReset: boolean
@@ -12,17 +11,15 @@ export default class FrameListInstance {
     private document: Document
     private resetMutex: Mutex
     private webviewPanel: vscode.WebviewPanel
-    private frameHexProvider: FrameHexProvider
-    private frameTree: FrameTree
+    private frameExplorer: FrameExplorer
 
-    constructor(document: Document, webviewPanel: vscode.WebviewPanel, context: vscode.ExtensionContext, frameHexProvider: FrameHexProvider, frameTree: FrameTree) {
+    constructor(document: Document, webviewPanel: vscode.WebviewPanel, context: vscode.ExtensionContext, frameExplorer: FrameExplorer) {
         this.stopReset = false
         this.context = context
         this.document = document
         this.resetMutex = new Mutex()
         this.webviewPanel = webviewPanel
-        this.frameHexProvider = frameHexProvider
-        this.frameTree = frameTree
+        this.frameExplorer = frameExplorer
 
         Context.setActiveDocumentPath(this.context, this.document.uri.path)
 
@@ -70,11 +67,11 @@ export default class FrameListInstance {
             case "frameListWebviewFrameFocused":
                 const frameNumber = (message as FrameListWebviewFrameFocusedMessage).frame
                 const frame = await this.document.getFrame(frameNumber)
-                this.frameTree.frameTreeDataProvider.setFrameTreeData(frame.tree)
-                this.frameHexProvider.setBuffer(frame.bytes)
+                this.frameExplorer.frameTreeDataProvider.setFrameTreeData(frame.tree)
+                this.frameExplorer.frameHexProvider.reset(frame.bytes, frame.byteRanges)
                 break
             case "frameListWebviewRevealFrameTree":
-                await this.frameTree.reveal()
+                await this.frameExplorer.reveal()
                 const revealFrameMessage: FrameListInstanceRevealFrameMessage = {
                     type: "frameListInstanceRevealFrame",
                     rowNodeId: (message as FrameListWebviewRevealFrameTreeMessage).rowNodeId

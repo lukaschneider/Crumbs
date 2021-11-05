@@ -1,7 +1,20 @@
 # Change Log
 
 All notable changes to Crumbs will be documented here.
-## [0.1.4] - tbd
+## [0.1.5] - tbd
+
+## [0.1.4] - 2021-11-05
+Finally a fully functional Hex View - with selection and settings. Next up will be (FINALLY) the option to set display filters.
+
+### Added
+- MacOS "Getting Started" instructions. Revived my old Macbook. Works as expected 😁.
+- Option to disable rowWrapping in the new FrameHex view.
+- Selecting a field in the FrameTree now selects the bytes in the FrameHex View and vice versa.
+
+### Changed
+- Disabled the contextmenu on the FrameList. The context menu is an "Enterprise" feature of AGGrid and I can therefore not make use of it properly.
+- Text of the recently introduced "Open Last Active Trace File in Wireshark" feature now better describes what it does.
+- Refactored FrameHex view to make it more configurable.
 
 ## [0.1.3] - 2021-08-28
 Some Quality updates and an initial Hex View 🎉. In the future this new Hex View should idealy be able to focus things in the Tree View and vice versa and live in more crumbled places too.

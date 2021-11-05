@@ -39,6 +39,7 @@ export default class FrameList extends React.Component {
                         } : {}
                     }}
                     suppressColumnVirtualisation={true}
+                    suppressContextMenu={true}
                     suppressDragLeaveHidesColumns={true}
                     suppressLoadingOverlay={true}
                     suppressNoRowsOverlay={true}
@@ -52,6 +53,9 @@ export default class FrameList extends React.Component {
         this.columnApi = params.columnApi
 
         window.addEventListener("message", this.onMessage.bind(this))
+
+        // Workarround since the suppressContextMenu option doesn't seem to work...
+        document.addEventListener("contextmenu", e => {e.preventDefault()})
 
         const message: FrameListWebviewReadyMessage = { type: "frameListWebviewReady" }
         vscodeApi.postMessage(message)

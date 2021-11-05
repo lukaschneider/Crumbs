@@ -3,24 +3,45 @@ import * as vscode from "vscode"
 export default class FrameHexInstance {
     private context: vscode.ExtensionContext
     private webviewView: vscode.WebviewView
+    private focusFrameTreeItemAtRange: Function
 
-    constructor(context: vscode.ExtensionContext, webviewView: vscode.WebviewView, webviewResolveContext: vscode.WebviewViewResolveContext, token: vscode.CancellationToken) {
+    constructor(context: vscode.ExtensionContext, webviewView: vscode.WebviewView, focusFrameTreeItemAtRange: Function) {
         this.context = context
         this.webviewView = webviewView
+        this.focusFrameTreeItemAtRange = focusFrameTreeItemAtRange
 
         webviewView.webview.options = { enableScripts: true }
         webviewView.webview.html = this.generateWebviewHtml()
         webviewView.webview.onDidReceiveMessage(this.onMessage.bind(this))
     }
 
-    setBuffer(buffer: string) {
-        const message: FrameHexInstanceSetBufferMessage = {type: "frameHexInstanceSetBuffer", buffer: buffer}
+    select(byteRange: SharkdByteRange) {
+        const message: FrameHexInstanceSelectMessage = {
+            type: "frameHexInstanceSelect",
+            byteRange: byteRange
+        }
+        this.webviewView.webview.postMessage(message)
+    }
+
+    reset(buffer: string, byteRanges: SharkdByteRange[]) {
+        const message: FrameHexInstanceResetMessage = {
+            type: "frameHexInstanceReset",
+            buffer: buffer,
+            byteRanges: byteRanges,
+            rowLength: vscode.workspace.getConfiguration("crumbs").get("frameHex.rowLength") ?? 16,
+            setLength: vscode.workspace.getConfiguration("crumbs").get("frameHex.setLength") ?? 8,
+            enableRowWrap: vscode.workspace.getConfiguration("crumbs").get("frameHex.rowWrap") ?? true,
+        }
         this.webviewView.webview.postMessage(message)
     }
 
     private onMessage(message: FrameHexWebviewMessage) {
         switch (message.type) {
             case "frameHexWebviewReady":
+                // Woah you are actually looking through my code! Thanks :D
+                break;
+            case "frameHexWebviewSelect":
+                this.focusFrameTreeItemAtRange((message as FrameHexWebviewSelectMessage).byteRange)
                 break;
         }
     }

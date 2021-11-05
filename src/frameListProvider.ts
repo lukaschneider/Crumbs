@@ -2,20 +2,17 @@ import * as vscode from "vscode"
 
 import Context from "./context"
 import Document from "./document"
-import FrameHexProvider from "./frameHexProvider"
 import FrameListInstance from "./frameListInstance"
-import FrameTree from "./frameTree"
+import FrameExplorer from "./frameExplorer"
 
 export default class FrameListProvider implements vscode.CustomReadonlyEditorProvider {
     private context: vscode.ExtensionContext
-    private frameTree: FrameTree
-    private frameHexProvider: FrameHexProvider
+    private frameExplorer: FrameExplorer
     private openDocumentsCount: number
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context
-        this.frameHexProvider = new FrameHexProvider(context)
-        this.frameTree = new FrameTree()
+        this.frameExplorer = new FrameExplorer(context)
         this.openDocumentsCount = 0
 
         vscode.window.registerCustomEditorProvider("crumbs.FrameList", this, {
@@ -39,6 +36,6 @@ export default class FrameListProvider implements vscode.CustomReadonlyEditorPro
     }
 
     resolveCustomEditor(document: Document, webviewPanel: vscode.WebviewPanel): void {
-        new FrameListInstance(document, webviewPanel, this.context, this.frameHexProvider, this.frameTree)
+        new FrameListInstance(document, webviewPanel, this.context, this.frameExplorer)
     }
 }

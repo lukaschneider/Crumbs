@@ -2,7 +2,7 @@
     "name": "crumbs",
     "displayName": "Crumbs",
     "description": "Open Packet Traces (Pcaps) in Visual Studio Code.",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "publisher": "lukaschneider",
     "icon": "icon.png",
     "capabilities": {
@@ -32,8 +32,8 @@
         "commands": [
             {
                 "command": "crumbs.openActiveInWireshark",
-                "title": "Crumbs: Open Active Trace File in Wireshark",
-                "shortTitle": "Open Active Trace File in Wireshark",
+                "title": "Crumbs: Open Last Active Trace File in Wireshark",
+                "shortTitle": "Open Last Active Trace File in Wireshark",
                 "enablement": "crumbs.context.activeDocumentPath && crumbs.context.activeDocumentPath != "
             }
         ],
@@ -132,6 +132,21 @@
                         "type": "integer",
                         "default": 5000,
                         "description": "To minimise performance problems and provide information as quickly as possible, Crumbs divides trace files into chunks while loading."
+                    },
+                    "crumbs.frameHex.rowLength": {
+                        "type": "integer",
+                        "default": "16",
+                        "description": "The number of bytes to display in a row."
+                    },
+                    "crumbs.frameHex.setLength": {
+                        "type": "integer",
+                        "default": "8",
+                        "description": "The number of bytes after a row should be split."
+                    },
+                    "crumbs.frameHex.rowWrap": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "When enabled the ascii values will wrap below the hex values if not enough space is available."
                     }
                 }
             }

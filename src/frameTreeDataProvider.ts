@@ -1,4 +1,5 @@
 import * as vscode from "vscode"
+import { isEqual } from "lodash";
 
 import FrameTreeItem from "./frameTreeItem";
 
@@ -35,5 +36,21 @@ export default class FrameTreeDataProvider implements vscode.TreeDataProvider<Fr
 
     getRootTreeItems() {
         return this.rootTreeItems
+    }
+
+    getTreeItemAtRange(range: SharkdByteRange) {
+        let item: FrameTreeItem
+
+        const findItem = (currentItem: FrameTreeItem) => {
+            if(isEqual(currentItem.byteRange, range) && !currentItem.generated) {
+                item = currentItem
+            } else {
+                this.getChildren(currentItem).forEach(childItem => findItem(childItem))
+            }
+        }
+        this.rootTreeItems.forEach(currentItem => findItem(currentItem))
+
+        // @ts-ignore ...
+        return item
     }
 }
