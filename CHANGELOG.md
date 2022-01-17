@@ -1,7 +1,10 @@
 # Change Log
 
 All notable changes to Crumbs will be documented here.
-## [0.1.5] - tbd
+## [0.1.5] - 2022-01-17
+
+### Fixed
+- Support for Sharkd (Wireshark) 3.6.0
 
 ## [0.1.4] - 2021-11-05
 Finally a fully functional Hex View - with selection and settings. Next up will be (FINALLY) the option to set display filters.
