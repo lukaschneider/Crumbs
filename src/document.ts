@@ -1,16 +1,46 @@
 import * as ndjson from "ndjson"
 import * as vscode from "vscode"
-import { ChildProcess, spawn } from "child_process"
+import * as semver from "semver"
+import { ChildProcess, spawn, spawnSync } from "child_process"
 import { Mutex } from "async-mutex"
 import { isEqual, omit, uniqWith } from "lodash"
 
 export default class Document extends vscode.Disposable implements vscode.CustomDocument {
     uri: vscode.Uri
 
-    private process: ChildProcess
-    private requestMutex: Mutex
     private disposeEvent = new vscode.EventEmitter<void>()
     private jsonRPC2: boolean
+    private process: ChildProcess
+    private requestMutex: Mutex
+
+    private createProcess = () => {
+        return spawn(this.getSharkdCommand(), ["-"]).on("error", (error) => {
+            vscode.window.showErrorMessage(`Could not start sharkd: ${error.message}`)
+        })
+    }
+
+    private getSharkdCommand = (): string => {
+        return vscode.workspace.getConfiguration("crumbs").get("sharkd") || "sharkd"
+    }
+
+    private loadFile = async (path: string) => {
+        const response = await this.request<SharkdLoadFileRequest, SharkdLoadFileResponse>({ method: "load", file: path })
+        
+        // FIXME: With the new jsonRPC 2.0 API there is a seperate result and error response. This "feature" was skipped for now.
+        if (response.err === 2) {
+            vscode.window.showErrorMessage(`${this.uri.path} does not exist!`)
+        }
+    }
+
+    private supportsJsonRPC2 = () => {
+        const process = spawnSync(this.getSharkdCommand(), ["--version"], {stdio: 'pipe', encoding: 'utf-8'})
+        const matches = process.output[1].match(/\d+\.\d+\.\d+/)
+
+        if (matches && matches.length > 0) {
+            return semver.gte("3.6.0", matches.pop()!)
+        }
+        return false
+    }
 
     constructor(uri: vscode.Uri) {
         super(() => this.dispose())
@@ -18,29 +48,10 @@ export default class Document extends vscode.Disposable implements vscode.Custom
         this.uri = uri
         this.requestMutex = new Mutex()
 
-        this.jsonRPC2 = true
+        this.jsonRPC2 = this.supportsJsonRPC2()
 
-        const createProcess = () => {
-            const sharkd: string = vscode.workspace.getConfiguration("crumbs").get("sharkd") || "sharkd"
-
-            return spawn(sharkd, ["-"]).on("error", error => {
-                vscode.window.showErrorMessage(`Could not start sharkd: ${error.message}`)
-            })
-        }
-
-        this.process = createProcess()
-
-        vscode.window.withProgress(
-            {
-                location: vscode.ProgressLocation.Window,
-                title: `Loading ${uri.path}`,
-            },
-            async () => {
-                const response = await this.request<SharkdLoadFileRequest, SharkdLoadFileResponse>({ method: "load", file: uri.path })
-                if (response.err === 2) {
-                    vscode.window.showErrorMessage(`${this.uri.path} does not exist!`)
-                }
-            })
+        this.process = this.createProcess()
+        this.loadFile(uri.path)
     }
 
     async dispose() {
