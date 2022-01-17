@@ -1,19 +1,46 @@
 import * as ndjson from "ndjson"
 import * as vscode from "vscode"
-import { ChildProcess, spawn } from "child_process"
-import { Socket } from "net"
+import * as semver from "semver"
+import { ChildProcess, spawn, spawnSync } from "child_process"
 import { Mutex } from "async-mutex"
-import { URL as url } from "url"
-import { v4 as uuid } from "uuid"
-import { isEqual, uniqWith } from "lodash"
+import { isEqual, omit, uniqWith } from "lodash"
 
 export default class Document extends vscode.Disposable implements vscode.CustomDocument {
     uri: vscode.Uri
 
-    private socket: Promise<Socket>
+    private disposeEvent = new vscode.EventEmitter<void>()
+    private jsonRPC2: boolean
     private process: ChildProcess
     private requestMutex: Mutex
-    private disposeEvent = new vscode.EventEmitter<void>()
+
+    private createProcess = () => {
+        return spawn(this.getSharkdCommand(), ["-"]).on("error", (error) => {
+            vscode.window.showErrorMessage(`Could not start sharkd: ${error.message}`)
+        })
+    }
+
+    private getSharkdCommand = (): string => {
+        return vscode.workspace.getConfiguration("crumbs").get("sharkd") || "sharkd"
+    }
+
+    private loadFile = async (path: string) => {
+        const response = await this.request<SharkdLoadFileRequest, SharkdLoadFileResponse>({ method: "load", file: path })
+        
+        // FIXME: With the new jsonRPC 2.0 API there is a seperate result and error response. This "feature" was skipped for now.
+        if (response.err === 2) {
+            vscode.window.showErrorMessage(`${this.uri.path} does not exist!`)
+        }
+    }
+
+    private supportsJsonRPC2 = () => {
+        const process = spawnSync(this.getSharkdCommand(), ["--version"], {stdio: 'pipe', encoding: 'utf-8'})
+        const matches = process.output[1].match(/\d+\.\d+\.\d+/)
+
+        if (matches && matches.length > 0) {
+            return semver.gte("3.6.0", matches.pop()!)
+        }
+        return false
+    }
 
     constructor(uri: vscode.Uri) {
         super(() => this.dispose())
@@ -21,31 +48,13 @@ export default class Document extends vscode.Disposable implements vscode.Custom
         this.uri = uri
         this.requestMutex = new Mutex()
 
-        const socketUrl = new url(`/tmp/vscode-crumbs-${uuid()}.sock`, "unix://")
-        const sharkd: string = vscode.workspace.getConfiguration("crumbs").get("sharkd") || "sharkd"
+        this.jsonRPC2 = this.supportsJsonRPC2()
 
-        this.process = spawn(sharkd, [socketUrl.href]).on("error", error => {
-            vscode.window.showErrorMessage(`Could not start sharkd: ${error.message}`)
-        })
-
-        this.socket = new Promise<Socket>(resolve => {
-            const socket = new Socket().connect(socketUrl.pathname)
-
-            socket.on("error", () => socket.connect(socketUrl.pathname))
-            socket.on("connect", () => resolve(socket.removeAllListeners()))
-        })
-
-        vscode.window.withProgress(
-            {
-                location: vscode.ProgressLocation.Window,
-                title: `Loading ${uri.path}`,
-            },
-            async () => {
-                this.request<SharkdLoadFileRequest, void>({ req: "load", file: uri.path })
-            })
+        this.process = this.createProcess()
+        this.loadFile(uri.path)
     }
 
-    dispose() {
+    async dispose() {
         this.process.kill()
         this.disposeEvent.fire()
     }
@@ -55,8 +64,8 @@ export default class Document extends vscode.Disposable implements vscode.Custom
     getFrames(columns: ConfigColumn[], skip: number, limit: number) {
         return this.request<SharkdGetFramesRequest, SharkdFrame[]>(Object.assign(
             {
-                req: "frames",
-                skip: skip,
+                method: "frames",
+                skip: skip === 0 ? undefined : skip,
                 limit: limit
             },
             ...columns.map((column, index) => {
@@ -71,10 +80,10 @@ export default class Document extends vscode.Disposable implements vscode.Custom
 
     async getFrame(frame: number) {
         const response = await this.request<SharkdGetFrameTreeRequest, SharkdFrameResponse>({
-            req: "frame",
+            method: "frame",
             frame: frame,
-            proto: 1,
-            bytes: 1
+            proto: true,
+            bytes: true
         })
 
         response.byteRanges = []
@@ -88,17 +97,27 @@ export default class Document extends vscode.Disposable implements vscode.Custom
         return response
     }
 
-    private request<RequestType, ResponseType>(request: RequestType): Promise<ResponseType> {
+    private request<RequestType extends SharkdBaseRequest, ResponseType>(request: RequestType): Promise<ResponseType> {
         return new Promise(async resolve => {
             const release = await this.requestMutex.acquire()
-            const socket = await this.socket
+
+            const getRequest = () => {
+                return this.jsonRPC2 ?
+                    JSON.stringify({ jsonrpc: "2.0", id: 1, method: request.method, params: { ...omit(request, "method") } }) + "\n" :
+                    JSON.stringify({ req: request.method, ...omit(request, "method") }) + "\n"
+            }
 
             try {
-                socket.write(JSON.stringify(request) + "\n")
-                socket.pipe(ndjson.parse()).once("data", async response => {
-                    socket.removeAllListeners()
+                this.process.stdin?.write(getRequest(), "utf-8")
+                this.process.stdout?.pipe(ndjson.parse()).once("data", async response => {
+                    this.process.stdout?.removeAllListeners()
                     release()
-                    resolve(response)
+
+                    if (this.jsonRPC2) {
+                        resolve(response.result)
+                    } else {
+                        resolve(response)
+                    }
                 })
             } catch {
                 release()

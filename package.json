@@ -2,7 +2,7 @@
     "name": "crumbs",
     "displayName": "Crumbs",
     "description": "Open Packet Traces (Pcaps) in Visual Studio Code.",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "publisher": "lukaschneider",
     "icon": "icon.png",
     "capabilities": {
@@ -308,6 +308,7 @@
         "@types/ndjson": "^2.0.0",
         "@types/node": "^12.11.7",
         "@types/react-dom": "^17.0.5",
+        "@types/semver": "^7.3.9",
         "@types/uuid": "^8.3.0",
         "@types/vscode": "^1.56.0",
         "@typescript-eslint/eslint-plugin": "^4.14.1",
@@ -335,6 +336,7 @@
         "react": "^17.0.2",
         "react-dom": "^17.0.2",
         "react-dom-factories": "^1.0.2",
+        "semver": "^7.3.5",
         "uuid": "^8.3.2"
     }
 }

@@ -1,20 +1,28 @@
-interface SharkdLoadFileRequest {
-    req: "load"
+interface SharkdBaseRequest {
+    method: string
+}
+
+interface SharkdLoadFileRequest extends SharkdBaseRequest {
+    method: "load"
     file: string
 }
 
-interface SharkdGetFramesRequest {
-    req: "frames"
+interface SharkdLoadFileResponse {
+    err: 0 | 2
+}
+
+interface SharkdGetFramesRequest extends SharkdBaseRequest {
+    method: "frames"
     skip: number
     limit: number
     // columnX: number | string
 }
 
-interface SharkdGetFrameTreeRequest {
-    req: "frame"
+interface SharkdGetFrameTreeRequest extends SharkdBaseRequest {
+    method: "frame"
     frame: number
-    proto: 1
-    bytes: 1
+    proto: boolean
+    bytes: boolean
 }
 
 interface SharkdFrame {
