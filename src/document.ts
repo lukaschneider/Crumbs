@@ -1,17 +1,13 @@
 import * as ndjson from "ndjson"
 import * as vscode from "vscode"
 import { ChildProcess, spawn } from "child_process"
-import { Socket } from "net"
 import { Mutex } from "async-mutex"
-import { URL as url } from "url"
-import { v4 as uuid } from "uuid"
 import { isEqual, omit, uniqWith } from "lodash"
 
 export default class Document extends vscode.Disposable implements vscode.CustomDocument {
     uri: vscode.Uri
 
-    private socket!: Promise<Socket>
-    private process!: ChildProcess
+    private process: ChildProcess
     private requestMutex: Mutex
     private disposeEvent = new vscode.EventEmitter<void>()
     private jsonRPC2: boolean
@@ -24,19 +20,15 @@ export default class Document extends vscode.Disposable implements vscode.Custom
 
         this.jsonRPC2 = true
 
-        const socketUrl = new url(`/tmp/vscode-crumbs-${uuid()}.sock`, "unix://")
-        const sharkd: string = vscode.workspace.getConfiguration("crumbs").get("sharkd") || "sharkd"
+        const createProcess = () => {
+            const sharkd: string = vscode.workspace.getConfiguration("crumbs").get("sharkd") || "sharkd"
 
-        this.process = spawn(sharkd, [socketUrl.href]).on("error", error => {
-            vscode.window.showErrorMessage(`Could not start sharkd: ${error.message}`)
-        })
+            return spawn(sharkd, ["-"]).on("error", error => {
+                vscode.window.showErrorMessage(`Could not start sharkd: ${error.message}`)
+            })
+        }
 
-        this.socket = new Promise<Socket>(resolve => {
-            const socket = new Socket().connect(socketUrl.pathname)
-
-            socket.on("error", () => socket.connect(socketUrl.pathname))
-            socket.on("connect", () => resolve(socket.removeAllListeners()))
-        })
+        this.process = createProcess()
 
         vscode.window.withProgress(
             {
@@ -52,7 +44,6 @@ export default class Document extends vscode.Disposable implements vscode.Custom
     }
 
     async dispose() {
-        (await this.socket).end()
         this.process.kill()
         this.disposeEvent.fire()
     }
@@ -98,7 +89,6 @@ export default class Document extends vscode.Disposable implements vscode.Custom
     private request<RequestType extends SharkdBaseRequest, ResponseType>(request: RequestType): Promise<ResponseType> {
         return new Promise(async resolve => {
             const release = await this.requestMutex.acquire()
-            const socket = await this.socket
 
             const getRequest = () => {
                 return this.jsonRPC2 ?
@@ -107,10 +97,9 @@ export default class Document extends vscode.Disposable implements vscode.Custom
             }
 
             try {
-                socket.write(getRequest())
-
-                socket.pipe(ndjson.parse()).once("data", async response => {
-                    socket.removeAllListeners()
+                this.process.stdin?.write(getRequest(), "utf-8")
+                this.process.stdout?.pipe(ndjson.parse()).once("data", async response => {
+                    this.process.stdout?.removeAllListeners()
                     release()
 
                     if (this.jsonRPC2) {
