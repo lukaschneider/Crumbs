@@ -32,9 +32,16 @@
         "commands": [
             {
                 "command": "crumbs.openActiveInWireshark",
-                "title": "Crumbs: Open Last Active Trace File in Wireshark",
-                "shortTitle": "Open Last Active Trace File in Wireshark",
+                "title": "Open Last Active Trace File in Wireshark",
+                "category": "Crumbs",
                 "enablement": "crumbs.context.activeDocumentPath && crumbs.context.activeDocumentPath != "
+            },
+            {
+                "command": "crumbs.applyDisplayFilter",
+                "title": "Apply Display Filter to Last Active Trace File",
+                "category": "Crumbs",
+                "enablement": "crumbs.context.activeDocumentPath && crumbs.context.activeDocumentPath != ",
+                "icon": "$filter"
             }
         ],
         "configuration": [

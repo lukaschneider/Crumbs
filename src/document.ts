@@ -25,7 +25,7 @@ export default class Document extends vscode.Disposable implements vscode.Custom
 
     private loadFile = async (path: string) => {
         const response = await this.request<SharkdLoadFileRequest, SharkdLoadFileResponse>({ method: "load", file: path })
-        
+
         // FIXME: With the new jsonRPC 2.0 API there is a seperate result and error response. This "feature" was skipped for now.
         if (response.err === 2) {
             vscode.window.showErrorMessage(`${this.uri.path} does not exist!`)
@@ -33,11 +33,11 @@ export default class Document extends vscode.Disposable implements vscode.Custom
     }
 
     private supportsJsonRPC2 = () => {
-        const process = spawnSync(this.getSharkdCommand(), ["--version"], {stdio: 'pipe', encoding: 'utf-8'})
+        const process = spawnSync(this.getSharkdCommand(), ["--version"], { stdio: 'pipe', encoding: 'utf-8' })
         const matches = process.output[1].match(/\d+\.\d+\.\d+/)
 
         if (matches && matches.length > 0) {
-            return semver.gte("3.6.0", matches.pop()!)
+            return semver.gte(matches.pop()!, "3.6.0")
         }
         return false
     }
@@ -61,12 +61,34 @@ export default class Document extends vscode.Disposable implements vscode.Custom
 
     readonly onDispose = this.disposeEvent.event
 
-    getFrames(columns: ConfigColumn[], skip: number, limit: number) {
+    async checkFilter(filter: string) {
+        const response = await this.request<SharkdCheckFilterRequest, SharkdCheckFilterResponse>({
+            method: "check",
+            filter: filter
+        })
+
+        return {
+            ok: response.status == "OK",
+            message: response.message
+        }
+    }
+
+    async completeField(field: string) {
+        const response = await this.request<SharkdCompleteFieldRequest, SharkdCompleteFieldResponse>({
+            method: "complete",
+            field: field
+        })
+
+        return response.field
+    }
+
+    getFrames(columns: ConfigColumn[], skip: number, limit: number, filter: string) {
         return this.request<SharkdGetFramesRequest, SharkdFrame[]>(Object.assign(
             {
                 method: "frames",
                 skip: skip === 0 ? undefined : skip,
-                limit: limit
+                limit,
+                filter
             },
             ...columns.map((column, index) => {
                 return {
@@ -114,7 +136,7 @@ export default class Document extends vscode.Disposable implements vscode.Custom
                     release()
 
                     if (this.jsonRPC2) {
-                        resolve(response.result)
+                        resolve(response.result ? response.result : response.error)
                     } else {
                         resolve(response)
                     }
