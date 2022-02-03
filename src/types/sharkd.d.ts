@@ -11,10 +11,36 @@ interface SharkdLoadFileResponse {
     err: 0 | 2
 }
 
+interface SharkdCheckFilterRequest extends SharkdBaseRequest {
+    method: "check",
+    filter: string
+}
+
+interface SharkdCheckFilterResponse {
+    status?: "OK",
+    code?: number,
+    message?: string,
+    filter?: string // Wireshark <3.6.0
+}
+
+interface SharkdCompleteFieldRequest extends SharkdBaseRequest {
+    method: "complete",
+    field: string
+}
+
+interface SharkdCompleteFieldResponse {
+    field: {
+        f: string
+        t: number
+        n: string
+    }[]
+}
+
 interface SharkdGetFramesRequest extends SharkdBaseRequest {
     method: "frames"
     skip: number
     limit: number
+    filter: string
     // columnX: number | string
 }
 

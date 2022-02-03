@@ -13,6 +13,8 @@ export default class FrameListInstance {
     private webviewPanel: vscode.WebviewPanel
     private frameExplorer: FrameExplorer
 
+    displayFilter: string
+
     constructor(document: Document, webviewPanel: vscode.WebviewPanel, context: vscode.ExtensionContext, frameExplorer: FrameExplorer) {
         this.stopReset = false
         this.context = context
@@ -20,8 +22,10 @@ export default class FrameListInstance {
         this.resetMutex = new Mutex()
         this.webviewPanel = webviewPanel
         this.frameExplorer = frameExplorer
+        this.displayFilter = ""
 
         Context.setActiveDocumentPath(this.context, this.document.uri.path)
+        Context.setActiveFrameListInstance(this.context, this)
 
         vscode.workspace.onDidChangeConfiguration(this.onConfigure.bind(this))
 
@@ -33,7 +37,15 @@ export default class FrameListInstance {
         webviewPanel.webview.onDidReceiveMessage(this.onMessage.bind(this))
     }
 
-    async reset() {
+    async checkFilter(filter: string = "") {
+        return await this.document.checkFilter(filter)
+    }
+
+    async completeField(field: string = "") {
+        return await this.document.completeField(field)
+    }
+
+    async reset(filter: string = "") {
         await this.resetMutex.runExclusive(async () => {
             this.stopReset = false
             const columns: ConfigColumn[] = vscode.workspace.getConfiguration("crumbs").get("frameList.columns") || []
@@ -41,19 +53,20 @@ export default class FrameListInstance {
             const message: FrameListInstanceResetMessage = { type: "frameListInstanceReset", columns: columns, colorCoding: colorCoding }
             this.webviewPanel.webview.postMessage(message)
 
-            await this.getFrames(columns)
+            await this.getFrames(columns, filter)
         })
     }
 
-    async getFrames(columns: ConfigColumn[], skip: number = 0, limit: number = 5000) {
-        const frames = await this.document.getFrames(columns, skip, limit)
+    async getFrames(columns: ConfigColumn[], filter: string = "", skip: number = 0, limit: number = 5000) {
+        const frames = await this.document.getFrames(columns, skip, limit, filter)
 
-        if (frames.length !== 0 && !this.stopReset) {
+        if (Array.isArray(frames) && frames.length !== 0 && !this.stopReset) {
             const message: FrameListInstanceFramesMessage = { type: "frameListInstanceFrames", frames: frames }
             this.webviewPanel.webview.postMessage(message)
 
             await this.getFrames(
                 columns,
+                filter,
                 skip + frames.length,
                 vscode.workspace.getConfiguration("crumbs").get("frameList.chunkSize"))
         }
@@ -92,12 +105,14 @@ export default class FrameListInstance {
     private onDidChangeViewState(event: vscode.WebviewPanelOnDidChangeViewStateEvent) {
         if (event.webviewPanel.active) {
             Context.setActiveDocumentPath(this.context, this.document.uri.path)
+            Context.setActiveFrameListInstance(this.context, this)
         }
     }
 
     private onDidDispose() {
         if(Context.getActiveDocumentPath(this.context) == this.document.uri.path) {
             Context.setActiveDocumentPath(this.context, "")
+            Context.setActiveFrameListInstance(this.context, undefined)
         }
     }
 

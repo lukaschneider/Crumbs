@@ -1,9 +1,11 @@
 import * as vscode from "vscode"
+import FrameListInstance from "./frameListInstance"
 
 export default abstract class Context {
     private static contextKey = {
         activeDocumentCount: "crumbs.context.activeDocumentCount",
         activeDocumentPath: "crumbs.context.activeDocumentPath",
+        activeFrameListInstance: "crumbse.context.activeFrameListInstance",
     }
 
     private static set(context: vscode.ExtensionContext, key: string, value: any) {
@@ -25,5 +27,13 @@ export default abstract class Context {
 
     static getActiveDocumentPath(context: vscode.ExtensionContext): string | undefined {
         return context.workspaceState.get(this.contextKey.activeDocumentPath)
+    }
+    
+    static setActiveFrameListInstance(context: vscode.ExtensionContext, frameListInstance?: FrameListInstance) {
+        this.set(context, this.contextKey.activeFrameListInstance, frameListInstance)
+    }
+
+    static getActiveFrameListInstance(context: vscode.ExtensionContext): FrameListInstance | undefined {
+        return context.workspaceState.get(this.contextKey.activeFrameListInstance)
     }
 }
