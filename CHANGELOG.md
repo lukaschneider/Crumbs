@@ -1,6 +1,16 @@
 # Change Log
 
 All notable changes to Crumbs will be documented here.
+## [0.1.6] - 2022-02-03
+The possiblity to do display filters is now finally here. It features auto completion of fields and validation of the filter.
+Also introduced new issues like an complete abuse of the vscode context, which of course want to fix :)).
+
+### Fixed
+- Support for Sharkd (Wireshark) >3.6.0 ... I f***ed up.
+
+### Added
+- DISPLAY FILTERS! Via a new command "Crumbs: Apply Display Filter to Last Active Trace File".
+
 ## [0.1.5] - 2022-01-17
 
 ### Fixed
