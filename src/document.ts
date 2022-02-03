@@ -68,8 +68,8 @@ export default class Document extends vscode.Disposable implements vscode.Custom
         })
 
         return {
-            ok: response.status == "OK",
-            message: response.message
+            ok: response.status == "OK" || response.filter == "ok",
+            message: response.message ?? response.filter
         }
     }
 

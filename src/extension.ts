@@ -28,6 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
         input.title = "Apply Display Filter"
         input.placeholder = "Display Filter"
         input.value = activeFrameListInstance.displayFilter
+        input.ignoreFocusOut = true
 
         let checkResult: { ok: boolean, message?: string }
 
@@ -41,7 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             input.items = [{
                 label: filter,
-                detail: checkResult.message
+                detail: !checkResult.ok ? checkResult.message : undefined
             }]
 
             const splitFilter = filter.split(/(\s*\&\&\s*|\s*\|\|\s*)/g)

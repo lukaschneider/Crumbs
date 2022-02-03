@@ -19,7 +19,8 @@ interface SharkdCheckFilterRequest extends SharkdBaseRequest {
 interface SharkdCheckFilterResponse {
     status?: "OK",
     code?: number,
-    message?: string
+    message?: string,
+    filter?: string // Wireshark <3.6.0
 }
 
 interface SharkdCompleteFieldRequest extends SharkdBaseRequest {
