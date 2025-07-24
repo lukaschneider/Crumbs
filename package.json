@@ -2,7 +2,7 @@
     "name": "crumbs",
     "displayName": "Crumbs",
     "description": "Open Packet Traces (Pcaps) in Visual Studio Code.",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "publisher": "lukaschneider",
     "icon": "icon.png",
     "capabilities": {
