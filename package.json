@@ -40,7 +40,7 @@
                 "command": "crumbs.applyDisplayFilter",
                 "title": "Apply Display Filter to Last Active Trace File",
                 "category": "Crumbs",
-                "enablement": "crumbs.context.activeDocumentPath && crumbs.context.activeDocumentPath != ",
+                "enablement": "false",
                 "icon": "$filter"
             }
         ],
@@ -65,31 +65,31 @@
                         "default": [
                             {
                                 "title": "Number",
-                                "type": 35
+                                "field": "frame.number"
                             },
                             {
                                 "title": "Time",
-                                "type": 38
+                                "field": "frame.time_relative"
                             },
                             {
                                 "title": "Source",
-                                "type": 39
-                            },
-                            {
-                                "title": "Destination",
-                                "type": 14
-                            },
-                            {
-                                "title": "Protocol",
-                                "type": 37
-                            },
-                            {
-                                "title": "Length",
                                 "type": 36
                             },
                             {
+                                "title": "Destination",
+                                "type": 11
+                            },
+                            {
+                                "title": "Protocol",
+                                "type": 34
+                            },
+                            {
+                                "title": "Length",
+                                "field": "frame.len"
+                            },
+                            {
                                 "title": "Info",
-                                "type": 28
+                                "type": 25
                             }
                         ],
                         "description": "The columns to be displayed in the frame list.",
@@ -116,7 +116,7 @@
                                     "maximum": 49,
                                     "multipleOf": 1,
                                     "default": 6,
-                                    "description": "Types of columns provided by Wireshark:\n0: 802.1Q VLAN id\n1: Absolute date, as YYYY-MM-DD, and time\n2: Absolute date, as YYYY/DOY, and time\n3: Absolute time\n4: Cisco VSAN\n5: Cumulative Bytes\n6: Custom (default)\n7: DCE/RPC call (cn_call_id / dg_seqnum)\n8: Delta time\n9: Delta time displayed\n10: Dest addr (resolved)\n11: Dest addr (unresolved)\n12: Dest port (resolved)\n13: Dest port (unresolved)\n14: Destination address\n15: Destination port\n16: Expert Info Severity\n17: FW-1 monitor if/direction\n18: Frequency/Channel\n19: Hardware dest addr\n20: Hardware src addr\n21: Hw dest addr (resolved)\n22: Hw dest addr (unresolved)\n23: Hw src addr (resolved)\n24: Hw src addr (unresolved)\n25: IEEE 802.11 RSSI\n26: IEEE 802.11 TX rate\n27: IP DSCP Value\n28: Information\n29: Net dest addr (resolved)\n30: Net dest addr (unresolved)\n31: Net src addr (resolved)\n32: Net src addr (unresolved)\n33: Network dest addr\n34: Network src addr\n35: Number\n36: Packet length (bytes)\n37: Protocol\n38: Relative time\n39: Source address\n40: Source port\n41: Src addr (resolved)\n42: Src addr (unresolved)\n43: Src port (resolved)\n44: Src port (unresolved)\n45: TEI\n46: UTC date, as YYYY-MM-DD, and time\n47: UTC date, as YYYY/DOY, and time\n48: UTC time\n49: Time (format as specified)"
+                                    "description": "Types of columns provided by Wireshark. Not stable!"
                                 },
                                 "field": {
                                     "type": "string",
@@ -142,12 +142,12 @@
                     },
                     "crumbs.frameHex.rowLength": {
                         "type": "integer",
-                        "default": "16",
+                        "default": 16,
                         "description": "The number of bytes to display in a row."
                     },
                     "crumbs.frameHex.setLength": {
                         "type": "integer",
-                        "default": "8",
+                        "default": 8,
                         "description": "The number of bytes after a row should be split."
                     },
                     "crumbs.frameHex.rowWrap": {
@@ -323,7 +323,7 @@
         "css-loader": "^5.2.4",
         "eslint": "^7.19.0",
         "glob": "^7.1.6",
-        "mocha": "^9.2.0",
+        "mocha": "^11.7.1",
         "process": "^0.11.10",
         "style-loader": "^2.0.0",
         "ts-loader": "^8.0.14",

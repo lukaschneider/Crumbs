@@ -25,7 +25,7 @@ export default class FrameListInstance {
         this.displayFilter = ""
 
         Context.setActiveDocumentPath(this.context, this.document.uri.path)
-        Context.setActiveFrameListInstance(this.context, this)
+        // Context.setActiveFrameListInstance(this.context, this)
 
         vscode.workspace.onDidChangeConfiguration(this.onConfigure.bind(this))
 
@@ -105,14 +105,14 @@ export default class FrameListInstance {
     private onDidChangeViewState(event: vscode.WebviewPanelOnDidChangeViewStateEvent) {
         if (event.webviewPanel.active) {
             Context.setActiveDocumentPath(this.context, this.document.uri.path)
-            Context.setActiveFrameListInstance(this.context, this)
+            // Context.setActiveFrameListInstance(this.context, this)
         }
     }
 
     private onDidDispose() {
         if(Context.getActiveDocumentPath(this.context) == this.document.uri.path) {
             Context.setActiveDocumentPath(this.context, "")
-            Context.setActiveFrameListInstance(this.context, undefined)
+            // Context.setActiveFrameListInstance(this.context, undefined)
         }
     }
 
