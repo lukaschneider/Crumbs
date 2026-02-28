@@ -1,42 +1,24 @@
-import * as vscode from "vscode"
-import FrameHexInstance from "./frameHexInstance"
+import * as vscode from "vscode";
+import FrameHex from "./frameHex";
 
 export default class FrameHexProvider implements vscode.WebviewViewProvider {
-    private context: vscode.ExtensionContext
-    private instance?: FrameHexInstance
-    private currentBuffer: string
-    private currentByteRanges: SharkdByteRange[]
-    private focusFrameTreeItemAtRange: Function
+  #context: vscode.ExtensionContext;
 
-    constructor(context: vscode.ExtensionContext, focusFrameTreeItemAtRange: Function) {
-        this.context = context
-        this.currentBuffer = ""
-        this.currentByteRanges = []
-        this.focusFrameTreeItemAtRange = focusFrameTreeItemAtRange
+  constructor(context: vscode.ExtensionContext) {
+    this.#context = context;
 
-        vscode.window.registerWebviewViewProvider("crumbs.frameHex", this, {
-            webviewOptions: { retainContextWhenHidden: true }
-        })
+    this.#context.subscriptions.push(
+      vscode.window.registerWebviewViewProvider("crumbsFrameHex", this, {
+        webviewOptions: { retainContextWhenHidden: true },
+      }),
+    );
+  }
 
-        vscode.workspace.onDidChangeConfiguration(this.onConfigure.bind(this))
-    }
-
-    resolveWebviewView(webviewView: vscode.WebviewView) {
-        this.instance = new FrameHexInstance(this.context, webviewView, this.focusFrameTreeItemAtRange)
-        this.reset(this.currentBuffer, this.currentByteRanges)
-    }
-
-    select(byteRange: SharkdByteRange) {
-        this.instance?.select(byteRange)
-    }
-
-    reset(buffer: string, byteRanges: SharkdByteRange[]) {
-        this.instance?.reset(buffer, byteRanges)
-        this.currentBuffer = buffer
-        this.currentByteRanges = byteRanges
-    }
-
-    private onConfigure() {
-        this.instance?.reset(this.currentBuffer, this.currentByteRanges)
-    }
+  resolveWebviewView(
+    webviewView: vscode.WebviewView,
+    _context: vscode.WebviewViewResolveContext,
+    _token: vscode.CancellationToken,
+  ): void {
+    new FrameHex(webviewView, this.#context);
+  }
 }

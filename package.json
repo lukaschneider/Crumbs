@@ -1,349 +1,181 @@
 {
-    "name": "crumbs",
-    "displayName": "Crumbs",
-    "description": "Open Packet Traces (Pcaps) in Visual Studio Code.",
-    "version": "0.1.7",
-    "publisher": "lukaschneider",
-    "icon": "icon.png",
-    "capabilities": {
-        "untrustedWorkspaces": {
-            "supported": false
-        },
-        "virtualWorkspaces": false
+  "name": "crumbs",
+  "displayName": "Crumbs",
+  "description": "Open Packet Traces (Pcaps) in Visual Studio Code.",
+  "version": "1.0.0",
+  "publisher": "lukaschneider",
+  "icon": "icon.png",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
     },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/lukaschneider/Crumbs"
-    },
-    "bugs": {
-        "url": "https://github.com/lukaschneider/Crumbs/issues"
-    },
-    "engines": {
-        "vscode": "^1.56.0"
-    },
-    "categories": [
-        "Other"
+    "virtualWorkspaces": false
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lukaschneider/Crumbs"
+  },
+  "bugs": {
+    "url": "https://github.com/lukaschneider/Crumbs/issues"
+  },
+  "license": "GPL-3.0-only",
+  "engines": {
+    "vscode": "^1.108.1"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "crumbsFrameList",
+        "displayName": "Frame List",
+        "selector": [
+          {
+            "filenamePattern": "*.cap*"
+          },
+          {
+            "filenamePattern": "*.pcap*"
+          }
+        ],
+        "priority": "default"
+      }
     ],
-    "activationEvents": [
-        "onCustomEditor:crumbs.FrameList"
-    ],
-    "main": "./out/extension.js",
-    "contributes": {
-        "commands": [
-            {
-                "command": "crumbs.openActiveInWireshark",
-                "title": "Open Last Active Trace File in Wireshark",
-                "category": "Crumbs",
-                "enablement": "crumbs.context.activeDocumentPath && crumbs.context.activeDocumentPath != "
-            },
-            {
-                "command": "crumbs.applyDisplayFilter",
-                "title": "Apply Display Filter to Last Active Trace File",
-                "category": "Crumbs",
-                "enablement": "false",
-                "icon": "$filter"
-            }
-        ],
-        "configuration": [
-            {
-                "title": "Crumbs",
-                "properties": {
-                    "crumbs.sharkd": {
-                        "type": "string",
-                        "default": "sharkd",
-                        "description": "Path to the sharkd binary.",
-                        "scope": "machine"
-                    },
-                    "crumbs.wireshark": {
-                        "type": "string",
-                        "default": "wireshark",
-                        "description": "Path to the wireshark binary.",
-                        "scope": "machine"
-                    },
-                    "crumbs.frameList.columns": {
-                        "type": "array",
-                        "default": [
-                            {
-                                "title": "Number",
-                                "field": "frame.number"
-                            },
-                            {
-                                "title": "Time",
-                                "field": "frame.time_relative"
-                            },
-                            {
-                                "title": "Source",
-                                "type": 36
-                            },
-                            {
-                                "title": "Destination",
-                                "type": 11
-                            },
-                            {
-                                "title": "Protocol",
-                                "type": 34
-                            },
-                            {
-                                "title": "Length",
-                                "field": "frame.len"
-                            },
-                            {
-                                "title": "Info",
-                                "type": 25
-                            }
-                        ],
-                        "description": "The columns to be displayed in the frame list.",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "hidden": {
-                                    "type": "boolean",
-                                    "default": false,
-                                    "description": "Whether this column should be shown or not. Default: false."
-                                },
-                                "pinned": {
-                                    "type": "boolean",
-                                    "default": false,
-                                    "description": "Pins this column to the left of the frame list. Default: false."
-                                },
-                                "title": {
-                                    "type": "string",
-                                    "description": "Title of this column."
-                                },
-                                "type": {
-                                    "type": "number",
-                                    "minimum": 0,
-                                    "maximum": 49,
-                                    "multipleOf": 1,
-                                    "default": 6,
-                                    "description": "Types of columns provided by Wireshark. Not stable!"
-                                },
-                                "field": {
-                                    "type": "string",
-                                    "description": "The field to display. Can be used in combination with column type 6."
-                                },
-                                "occurence": {
-                                    "type": "number",
-                                    "default": 0,
-                                    "description": "Which occurence of a filed should be used. Can be left out if you don't know what this is. Default: 0."
-                                }
-                            }
-                        }
-                    },
-                    "crumbs.frameList.colorCoding": {
-                        "type": "boolean",
-                        "default": true,
-                        "markdownDescription": "Use Wiresharks row coloring rules. **Note:** Might not work ideal with some color themes!"
-                    },
-                    "crumbs.frameList.chunkSize": {
-                        "type": "integer",
-                        "default": 5000,
-                        "description": "To minimise performance problems and provide information as quickly as possible, Crumbs divides trace files into chunks while loading."
-                    },
-                    "crumbs.frameHex.rowLength": {
-                        "type": "integer",
-                        "default": 16,
-                        "description": "The number of bytes to display in a row."
-                    },
-                    "crumbs.frameHex.setLength": {
-                        "type": "integer",
-                        "default": 8,
-                        "description": "The number of bytes after a row should be split."
-                    },
-                    "crumbs.frameHex.rowWrap": {
-                        "type": "boolean",
-                        "default": true,
-                        "description": "When enabled the ascii values will wrap below the hex values if not enough space is available."
-                    }
-                }
-            }
-        ],
-        "customEditors": [
-            {
-                "viewType": "crumbs.FrameList",
-                "displayName": "Frame List",
-                "selector": [
-                    {
-                        "filenamePattern": "*.dmp*"
-                    },
-                    {
-                        "filenamePattern": "*.cap*"
-                    },
-                    {
-                        "filenamePattern": "*.pcap*"
-                    },
-                    {
-                        "filenamePattern": "*.ntar*"
-                    },
-                    {
-                        "filenamePattern": "*.5vw*"
-                    },
-                    {
-                        "filenamePattern": "*.syc*"
-                    },
-                    {
-                        "filenamePattern": "*.fdc*"
-                    },
-                    {
-                        "filenamePattern": "*.trc*"
-                    },
-                    {
-                        "filenamePattern": "*.enc*"
-                    },
-                    {
-                        "filenamePattern": "*.caz*"
-                    },
-                    {
-                        "filenamePattern": "*.erf*"
-                    },
-                    {
-                        "filenamePattern": "*.bfr*"
-                    },
-                    {
-                        "filenamePattern": "*.cscpkt*"
-                    },
-                    {
-                        "filenamePattern": "*.tr1*"
-                    },
-                    {
-                        "filenamePattern": "*.rf5*"
-                    },
-                    {
-                        "filenamePattern": "*.wpz*"
-                    },
-                    {
-                        "filenamePattern": "*.apc*"
-                    },
-                    {
-                        "filenamePattern": "*.tpc*"
-                    },
-                    {
-                        "filenamePattern": "*.pkt*"
-                    },
-                    {
-                        "filenamePattern": "*.mplog*"
-                    },
-                    {
-                        "filenamePattern": "*.ncf*"
-                    },
-                    {
-                        "filenamePattern": "*.pklg*"
-                    },
-                    {
-                        "filenamePattern": "*.dcf*"
-                    },
-                    {
-                        "filenamePattern": "*.ipfix*"
-                    },
-                    {
-                        "filenamePattern": "*.pfx*"
-                    },
-                    {
-                        "filenamePattern": "*.aps*"
-                    },
-                    {
-                        "filenamePattern": "*.mpg*"
-                    },
-                    {
-                        "filenamePattern": "*.mp2t*"
-                    },
-                    {
-                        "filenamePattern": "*.vwr*"
-                    },
-                    {
-                        "filenamePattern": "*.camins*"
-                    },
-                    {
-                        "filenamePattern": "*.tnef*"
-                    }
-                ],
-                "priority": "default"
-            }
-        ],
-        "viewsContainers": {
-            "panel": [
-                {
-                    "id": "frameExplorer",
-                    "title": "Frame Explorer",
-                    "icon": "$(telescope)",
-                    "when": "crumbs.context.activeDocumentCount > 0"
-                }
-            ]
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "crumbsFrameExplorer",
+          "title": "Frame Explorer",
+          "icon": "$(telescope)"
+        }
+      ]
+    },
+    "views": {
+      "crumbsFrameExplorer": [
+        {
+          "id": "crumbsFrameTree",
+          "contextualTitle": "Frame Explorer",
+          "name": "Tree",
+          "icon": "$(list-tree)",
+          "type": "tree",
+          "when": "openDocumentCount > 0"
         },
-        "views": {
-            "frameExplorer": [
-                {
-                    "id": "crumbs.frameTree",
-                    "contextualTitle": "Frame Explorer",
-                    "name": "Tree",
-                    "icon": "$(list-tree)",
-                    "type": "tree",
-                    "when": "crumbs.context.activeDocumentCount > 0"
-                },
-                {
-                    "id": "crumbs.frameHex",
-                    "contextualTitle": "Frame Explorer",
-                    "name": "Hex",
-                    "icon": "$(file-binary)",
-                    "type": "webview",
-                    "when": "crumbs.context.activeDocumentCount > 0"
-                }
-            ]
-        },
-        "viewsWelcome": [
-            {
-                "view": "crumbs.frameTree",
-                "contents": "Click on a row in the Frame List to see the frame tree."
+        {
+          "id": "crumbsFrameHex",
+          "contextualTitle": "Frame Explorer",
+          "name": "Hex",
+          "icon": "$(file-binary)",
+          "type": "webview",
+          "when": "openDocumentCount > 0"
+        }
+      ]
+    },
+    "configuration": [
+      {
+        "title": "Crumbs",
+        "properties": {
+          "crumbs.sharkd": {
+            "type": "string",
+            "default": "sharkd",
+            "description": "Path to the sharkd binary.",
+            "scope": "machine"
+          },
+          "crumbs.wireshark": {
+            "type": "string",
+            "default": "wireshark",
+            "description": "Path to the wireshark binary.",
+            "scope": "machine"
+          },
+          "crumbs.profile": {
+            "type": "string",
+            "default": "Default",
+            "description": "The wireshark profile to use.",
+            "scope": "machine"
+          },
+          "crumbs.frameList.columns": {
+            "type": "object",
+            "default": null,
+            "examples": [
+              {
+                "Number": "%m",
+                "Time": "%t",
+                "Source": "%s",
+                "Destination": "%d",
+                "Protocol": "%p",
+                "Length": "%L",
+                "Info": "%i"
+              }
+            ],
+            "markdownDescription": "The columns to be displayed in the frame list. If nothing is set default columns are used.\n\n**Note:** Run `tshark -G column-formats` to see available field types or use a display filter field. See available fields here: https://www.wireshark.org/docs/dfref/. If you need to add field occurrence you can do so by adding \":`occurrence`\".",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Key is the column title and value is the field type or expression."
             }
-        ]
-    },
-    "scripts": {
-        "vscode:prepublish": "npm run package",
-        "compile": "webpack",
-        "watch": "webpack --watch",
-        "package": "webpack --mode production --devtool hidden-source-map",
-        "test-compile": "tsc -p ./",
-        "test-watch": "tsc -watch -p ./",
-        "pretest": "npm run test-compile && npm run lint",
-        "lint": "eslint src --ext ts",
-        "test": "node ./out/test/runTest.js"
-    },
-    "devDependencies": {
-        "@types/glob": "^7.1.3",
-        "@types/lodash": "^4.14.169",
-        "@types/mocha": "^8.0.4",
-        "@types/ndjson": "^2.0.0",
-        "@types/node": "^12.11.7",
-        "@types/react-dom": "^17.0.5",
-        "@types/semver": "^7.3.9",
-        "@types/uuid": "^8.3.0",
-        "@types/vscode": "^1.56.0",
-        "@typescript-eslint/eslint-plugin": "^4.14.1",
-        "@typescript-eslint/parser": "^4.14.1",
-        "css-loader": "^5.2.4",
-        "eslint": "^7.19.0",
-        "glob": "^7.1.6",
-        "mocha": "^11.7.1",
-        "process": "^0.11.10",
-        "style-loader": "^2.0.0",
-        "ts-loader": "^8.0.14",
-        "typescript": "^4.1.3",
-        "vscode-test": "^1.5.0",
-        "webpack": "^5.19.0",
-        "webpack-cli": "^4.4.0"
-    },
-    "dependencies": {
-        "ag-grid-community": "^25.2.1",
-        "ag-grid-react": "^25.2.0",
-        "async-mutex": "^0.3.1",
-        "buffer": "^6.0.3",
-        "classnames": "^2.3.1",
-        "lodash": "^4.17.21",
-        "ndjson": "^2.0.0",
-        "react": "^17.0.2",
-        "react-dom": "^17.0.2",
-        "react-dom-factories": "^1.0.2",
-        "semver": "^7.3.5",
-        "uuid": "^8.3.2"
-    }
+          },
+          "crumbs.frameList.colorCoding": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "Use Wiresharks row coloring rules.\n\n**Note:** Might not work ideal with some color themes!"
+          },
+          "crumbs.frameHex.enableRowWrap": {
+            "type": "boolean",
+            "default": true,
+            "description": "When enabled the ascii values will wrap below the hex values if not enough space is available."
+          },
+          "crumbs.frameHex.rowLength": {
+            "type": "integer",
+            "default": 16,
+            "description": "The number of values to display in a row"
+          },
+          "crumbs.frameHex.setLength": {
+            "type": "integer",
+            "default": 8,
+            "description": "The number of values to be grouped together into a set within one row"
+          }
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "biome lint --write",
+    "format": "biome format --write",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.13",
+    "@types/lodash": "^4.17.23",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/react": "^19.2.10",
+    "@types/react-dom": "^19.2.3",
+    "@types/tmp": "^0.2.6",
+    "@types/vscode": "^1.108.1",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.27.2",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.52.0"
+  },
+  "dependencies": {
+    "ag-grid-react": "^35.0.1",
+    "classnames": "^2.5.1",
+    "json-rpc-2.0": "^1.7.1",
+    "lodash": "^4.17.23",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tmp": "^0.2.5"
+  }
 }
