@@ -1,18 +1,12 @@
 {
-	"compilerOptions": {
-		"module": "CommonJS",
-		"target": "ES6",
-		"outDir": "out",
-		"lib": [
-			"ES6"
-		],
-		"sourceMap": true,
-		"rootDir": "src",
-		"strict": true
-	},
-	"exclude": [
-		"node_modules",
-		".vscode-test",
-		"src/webviews"
-	]
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "lib": ["ES2022"],
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/webview"]
 }

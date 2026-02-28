@@ -32,7 +32,3 @@ Crumbs is already set as the default editor for a lot of file extensions. If you
 
 ### Windows
 Currently there is no way to run this extension directly under Windows. But it is possible to use Crumbs via WSL!
-
-#
-
-<a href="https://www.buymeacoffee.com/lukaschneider" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
