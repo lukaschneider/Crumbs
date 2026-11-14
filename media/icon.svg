@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <title>Crumbs</title>
+  <defs>
+    <linearGradient id="ribbon" x1="154" y1="24" x2="108" y2="232" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8dc894"/>
+      <stop offset=".4" stop-color="#66b4c8"/>
+      <stop offset=".75" stop-color="#e8c17f"/>
+      <stop offset="1" stop-color="#e79281"/>
+    </linearGradient>
+    <clipPath id="shape">
+      <path d="M213.19 68.35A104 104 0 1 0 213.19 187.65L177.97 162.99A61 61 0 1 1 177.97 93.01Z"/>
+    </clipPath>
+  </defs>
+  <g transform="translate(9.4 0)">
+    <path d="M213.19 68.35A104 104 0 1 0 213.19 187.65L177.97 162.99A61 61 0 1 1 177.97 93.01Z" fill="url(#ribbon)" stroke="url(#ribbon)" stroke-width="2" stroke-linejoin="round"/>
+    <g clip-path="url(#shape)" fill="#fff" opacity=".23">
+      <path d="m147 164 11 0-48 83h-11zM172 164h11l-48 83h-11z"/>
+    </g>
+  </g>
+</svg>

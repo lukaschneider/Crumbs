@@ -1,56 +1,82 @@
-import * as vscode from "vscode"
-import { isEqual } from "lodash";
+import * as vscode from "vscode";
+import type { ByteRange, TreeNode } from "./types/sharkd";
 
-import FrameTreeItem from "./frameTreeItem";
-
-export default class FrameTreeDataProvider implements vscode.TreeDataProvider<FrameTreeItem> {
-    private rootTreeItems: FrameTreeItem[]
-
-    constructor() {
-        this.rootTreeItems = []
+export class FrameTreeItem extends vscode.TreeItem {
+  readonly children: FrameTreeItem[];
+  constructor(
+    readonly node: TreeNode,
+    index: number,
+    readonly parent?: FrameTreeItem,
+  ) {
+    super(
+      node.g ? `[${node.l}]` : node.l,
+      node.n?.length
+        ? vscode.TreeItemCollapsibleState.Collapsed
+        : vscode.TreeItemCollapsibleState.None,
+    );
+    this.id = `${parent?.id ?? "root"}-${index}`;
+    this.contextValue =
+      node.f && node.f !== "text" ? "crumbsFilterable" : undefined;
+    this.children = (node.n ?? []).map(
+      (child, childIndex) => new FrameTreeItem(child, childIndex, this),
+    );
+    const icons: Record<string, [string, string]> = {
+      chat: ["comment-discussion", "terminal.ansiBlue"],
+      note: ["note", "terminal.ansiCyan"],
+      warning: ["warning", "terminal.ansiYellow"],
+      error: ["error", "terminal.ansiRed"],
+    };
+    const icon = node.s ? icons[node.s.toLowerCase()] : undefined;
+    if (icon) {
+      this.iconPath = new vscode.ThemeIcon(
+        icon[0],
+        new vscode.ThemeColor(icon[1]),
+      );
     }
+  }
+}
 
-    private _onDidChangeTreeData = new vscode.EventEmitter<void>()
-    readonly onDidChangeTreeData = this._onDidChangeTreeData.event
+export class FrameTreeDataProvider
+  implements vscode.TreeDataProvider<FrameTreeItem>, vscode.Disposable
+{
+  #roots: FrameTreeItem[] = [];
+  #ranges = new Map<string, FrameTreeItem>();
+  #items = new Set<FrameTreeItem>();
+  #changed = new vscode.EventEmitter<void>();
+  readonly onDidChangeTreeData = this.#changed.event;
 
-    setFrameTreeData(rootNodes: SharkdFrameTreeNode[]) {
-        this.rootTreeItems = rootNodes.map((node, index) => new FrameTreeItem(node, index))
-        this._onDidChangeTreeData.fire()
-    }
+  setRootNodes(nodes: TreeNode[]) {
+    this.#roots = nodes.map((node, index) => new FrameTreeItem(node, index));
+    this.#ranges.clear();
+    this.#items.clear();
+    const index = (item: FrameTreeItem) => {
+      this.#items.add(item);
+      const range = item.node.h;
+      if (range && range[1] > 0 && !item.node.g && !item.node.ds) {
+        this.#ranges.set(range.join(":"), item);
+      }
+      item.children.forEach(index);
+    };
+    this.#roots.forEach(index);
+    this.#changed.fire();
+  }
 
-    getTreeItem(item: FrameTreeItem) {
-        return item
-    }
-
-    getChildren(item: FrameTreeItem) {
-        if (item) {
-            return item.children.map((node, index) => new FrameTreeItem(node, index, item))
-        } else {
-            return this.getRootTreeItems()
-        }
-    }
-
-    getParent(item: FrameTreeItem) {
-        return item.parent
-    }
-
-    getRootTreeItems() {
-        return this.rootTreeItems
-    }
-
-    getTreeItemAtRange(range: SharkdByteRange) {
-        let item: FrameTreeItem
-
-        const findItem = (currentItem: FrameTreeItem) => {
-            if(isEqual(currentItem.byteRange, range) && !currentItem.generated) {
-                item = currentItem
-            } else {
-                this.getChildren(currentItem).forEach(childItem => findItem(childItem))
-            }
-        }
-        this.rootTreeItems.forEach(currentItem => findItem(currentItem))
-
-        // @ts-ignore ...
-        return item
-    }
+  getTreeItem(element: FrameTreeItem) {
+    return element;
+  }
+  hasItem(item: FrameTreeItem) {
+    return this.#items.has(item);
+  }
+  getChildren(element?: FrameTreeItem) {
+    return element ? element.children : this.#roots;
+  }
+  getParent(element: FrameTreeItem) {
+    return element.parent;
+  }
+  getTreeItemAtRange(range: ByteRange) {
+    return this.#ranges.get(range.join(":"));
+  }
+  dispose() {
+    this.#changed.dispose();
+  }
 }

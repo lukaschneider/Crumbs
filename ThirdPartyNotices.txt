@@ -1,0 +1,12 @@
+VS Code Codicons
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+The history, close, and close-all icons in src/webview/FilterToolbarIcon.tsx
+come from https://github.com/microsoft/vscode-codicons.
+The SVG path geometry is unchanged; the SVGs are rendered as React components.
+
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/legalcode
+
+The icons are provided as-is, without warranties. See the linked license
+for the full license terms and disclaimer of warranties.

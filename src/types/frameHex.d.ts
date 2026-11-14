@@ -1,29 +1,29 @@
-interface FrameHexProps {
+import type { ByteRange } from "./sharkd";
 
+export interface FrameRequest {
+  bytes: string;
+  byteRanges: ByteRange[];
 }
-
-interface FrameHexState {
-    buffer: string
-    byteRanges: SharkdByteRange[]
-    rowLength: number
-    setLength: number
-    /** @description byteIndexes which should be highlighted as hovered */
-    hoveredRange: number[]
-    /** @description byteIndexes which should be highlighted as selected */
-    selectedRange: number[]
-    enableRowWrap: boolean
+export interface FrameUpdate {
+  revision: number;
+  frame: FrameRequest | null;
 }
-
-interface FrameHexField {
-    byte?: number
-    byteIndex?: number
-    fieldIndex: number
-    hovered?: boolean
-    selected?: boolean
-    borderTop?: number
-    borderRight?: number
-    borderBottom?: number
-    borderLeft?: number
+export interface InitResponse extends FrameUpdate {
+  rowLength: number;
+  setLength: number;
+  enableRowWrap: boolean;
 }
-
-type FrameHexRows = FrameHexField[][]
+export interface FocusRequest {
+  byteRange: ByteRange;
+}
+export type FrameHexMethods = {
+  init: () => InitResponse;
+  focus: (params: FocusRequest) => void;
+};
+export type FrameHexWebviewMethods = {
+  frame: (params: FrameUpdate) => void;
+  focus: (params: FocusRequest) => void;
+  config: (
+    params: Pick<InitResponse, "rowLength" | "setLength" | "enableRowWrap">,
+  ) => void;
+};
