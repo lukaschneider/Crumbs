@@ -1,27 +1,29 @@
-import type * as sharkd from "./sharkd";
+import type { ByteRange } from "./sharkd";
 
-export interface InitResponse {
+export interface FrameRequest {
+  bytes: string;
+  byteRanges: ByteRange[];
+}
+export interface FrameUpdate {
+  revision: number;
+  frame: FrameRequest | null;
+}
+export interface InitResponse extends FrameUpdate {
   rowLength: number;
   setLength: number;
   enableRowWrap: boolean;
-  frame?: FrameRequest;
 }
-
-export interface FrameRequest {
-  buffer: Uint8Array;
-  byteRanges: sharkd.ByteRange[];
-}
-
 export interface FocusRequest {
-  byteRange: sharkd.ByteRange;
+  byteRange: ByteRange;
 }
-
 export type FrameHexMethods = {
   init: () => InitResponse;
   focus: (params: FocusRequest) => void;
 };
-
 export type FrameHexWebviewMethods = {
-  frame: (params: FrameRequest) => void;
+  frame: (params: FrameUpdate) => void;
   focus: (params: FocusRequest) => void;
+  config: (
+    params: Pick<InitResponse, "rowLength" | "setLength" | "enableRowWrap">,
+  ) => void;
 };

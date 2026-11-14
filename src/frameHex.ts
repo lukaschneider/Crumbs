@@ -1,134 +1,84 @@
 import {
   JSONRPCClient,
-  type JSONRPCRequest,
   JSONRPCServer,
   JSONRPCServerAndClient,
   type TypedJSONRPCServerAndClient,
 } from "json-rpc-2.0";
-import { isEqual, uniqWith } from "lodash";
 import * as vscode from "vscode";
-import type {
-  FrameHexMethods,
-  FrameHexWebviewMethods,
-  FrameRequest,
-} from "./types/frameHex";
-import type { ByteRange, FrameResponse, TreeNode } from "./types/sharkd";
+import type { FrameSelection } from "./frameSelection";
+import { getHexFrame } from "./hexData";
+import type { FrameHexMethods, FrameHexWebviewMethods } from "./types/frameHex";
+import type { ByteRange } from "./types/sharkd";
+import { webviewHtml } from "./webviewHtml";
 
 export default class FrameHex {
-  #webviewView: vscode.WebviewView;
-  #context: vscode.ExtensionContext;
-  #rpc: TypedJSONRPCServerAndClient<FrameHexMethods, FrameHexWebviewMethods>;
-
   constructor(
-    webviewView: vscode.WebviewView,
+    view: vscode.WebviewView,
     context: vscode.ExtensionContext,
+    selection: FrameSelection,
   ) {
-    this.#webviewView = webviewView;
-    this.#context = context;
-
-    // Setup webview
-    this.#webviewView.webview.options = { enableScripts: true };
-    this.#webviewView.webview.html = this.#generateWebviewHtml();
-
-    // Setup API
-    this.#rpc = new JSONRPCServerAndClient(
+    let revision = 0;
+    let disposed = false;
+    let frame = getHexFrame(selection.frame);
+    const config = () => {
+      const settings = vscode.workspace.getConfiguration("crumbs.frameHex");
+      return {
+        enableRowWrap: settings.get("enableRowWrap", true),
+        rowLength: settings.get("rowLength", 16),
+        setLength: settings.get("setLength", 8),
+      };
+    };
+    const rpc: TypedJSONRPCServerAndClient<
+      FrameHexMethods,
+      FrameHexWebviewMethods
+    > = new JSONRPCServerAndClient(
       new JSONRPCServer(),
-      new JSONRPCClient((request: JSONRPCRequest) => {
-        this.#webviewView.webview.postMessage(request);
-      }),
-    );
-
-    this.#webviewView.webview.onDidReceiveMessage((message) => {
-      this.#rpc.receiveAndSend(message);
-    });
-
-    this.#rpc.addMethod("init", () => {
-      const config = vscode.workspace.getConfiguration("crumbs.frameHex");
-      const enableRowWrap = config.get<boolean>("enableRowWrap", true);
-      const rowLength = config.get<number>("rowLength", 16);
-      const setLength = config.get<number>("setLength", 8);
-
-      const frame = this.#getCurrentFrame();
-      return { enableRowWrap, rowLength, setLength, frame };
-    });
-
-    this.#rpc.addMethod("focus", async (params) => {
-      await vscode.commands.executeCommand("frameTreeReveal", params.byteRange);
-    });
-
-    // Setup command handlers
-    this.#context.subscriptions.push(
-      vscode.commands.registerCommand("frameHexUpdateFrame", () => {
-        const frame = this.#getCurrentFrame();
-        if (!frame) {
-          return;
+      new JSONRPCClient(async (message) => {
+        if (!disposed) {
+          await view.webview.postMessage(message);
         }
-
-        this.#rpc.request("frame", frame).then(() => {});
       }),
     );
-
-    this.#context.subscriptions.push(
+    rpc.addMethod("init", () => ({ ...config(), revision, frame }));
+    rpc.addMethod("focus", async ({ byteRange }) => {
+      await vscode.commands.executeCommand("frameTreeReveal", byteRange);
+    });
+    const disposables = [
+      view.webview.onDidReceiveMessage((message) => {
+        void rpc.receiveAndSend(message);
+      }),
+      selection.onDidChange((selected) => {
+        frame = getHexFrame(selected);
+        rpc.notify("frame", { revision: ++revision, frame });
+      }),
       vscode.commands.registerCommand(
         "frameHexFocus",
-        async (byteRange?: ByteRange) => {
-          if (!byteRange) {
-            return;
-          }
-
-          this.#rpc.request("focus", { byteRange: byteRange });
+        (byteRange: ByteRange = [0, 0]) => {
+          rpc.notify("focus", { byteRange });
         },
       ),
+      vscode.workspace.onDidChangeConfiguration((event) => {
+        if (event.affectsConfiguration("crumbs.frameHex")) {
+          rpc.notify("config", config());
+        }
+      }),
+    ];
+    disposables.push(
+      view.onDidDispose(() => {
+        disposed = true;
+        rpc.rejectAllPendingRequests("Hex view closed");
+        disposables.forEach((disposable) => {
+          disposable.dispose();
+        });
+      }),
     );
-  }
-
-  #getCurrentFrame(): FrameRequest | undefined {
-    const frame =
-      this.#context.workspaceState.get<FrameResponse>("currentFrame");
-
-    if (!frame || !frame.bytes || !frame.tree) {
-      return;
-    }
-
-    const byteRanges: ByteRange[] = [];
-    const getByteRanges = (node: TreeNode) => {
-      if (node.n) {
-        node.n.map(getByteRanges);
-      }
-      if (node.h) {
-        byteRanges.push(node.h);
-      }
+    view.webview.options = {
+      enableScripts: true,
+      localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, "dist")],
     };
-    frame.tree.map(getByteRanges);
-
-    return {
-      buffer: new Uint8Array(Buffer.from(frame.bytes, "base64")),
-      byteRanges: uniqWith(byteRanges, isEqual),
-    };
-  }
-
-  #generateWebviewHtml(): string {
-    const scriptUri = this.#webviewView.webview.asWebviewUri(
-      vscode.Uri.joinPath(this.#context.extensionUri, "dist", "framehex.js"),
+    view.webview.html = webviewHtml(
+      view.webview,
+      vscode.Uri.joinPath(context.extensionUri, "dist", "framehex.js"),
     );
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="UTF-8"/>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <script src="${scriptUri}"></script>
-          <style>
-            html, body, #root {
-              font-family: var(--vscode-editor-font-family);
-              font-size: var(--vscode-font-size);
-              line-height: calc(var(--vscode-font-size) + 9px);
-            }
-          </style>
-        </head>
-        <body>
-          <div id="root"/>
-        </body>
-      </html>`;
   }
 }

@@ -3,10 +3,16 @@
 out/**
 node_modules/**
 src/**
+test/**
+scripts/**
+vitest.config.*
+playwright.config.*
+test-results/**
+playwright-report/**
 .gitignore
 .yarnrc
 esbuild.js
-**/tsconfig.json
+**/tsconfig*.json
 **/biome.json
 **/*.map
 **/*.ts

@@ -1,93 +1,131 @@
 import { type ChildProcess, spawn } from "node:child_process";
+import { StringDecoder } from "node:string_decoder";
 import { JSONRPCClient, type JSONRPCRequest } from "json-rpc-2.0";
-import * as vscode from "vscode";
 import type { SharkdClient } from "./types/sharkd";
 
-const outputChannel = vscode.window.createOutputChannel(
-  "Crumbs (sharkd)",
-  "json",
-);
+export interface SharkdOptions {
+  spawn?: typeof spawn;
+  startupTimeout?: number;
+  log?: (message: string) => void;
+}
 
-class Sharkd {
-  #profile: string;
-  #sharkdPath: string;
+export class Sharkd {
   #client?: SharkdClient;
-  #buffer: string = "";
+  #starting?: Promise<SharkdClient>;
   #process?: ChildProcess;
+  #failure?: Error;
+  #stopped = false;
 
-  constructor(profile: string = "Default", sharkdPath: string = "sharkd") {
-    this.#profile = profile;
-    this.#sharkdPath = sharkdPath;
+  constructor(
+    private readonly profile = "Default",
+    private readonly sharkdPath = "sharkd",
+    private readonly options: SharkdOptions = {},
+  ) {}
+
+  getClient(): Promise<SharkdClient> {
+    if (this.#stopped || this.#failure) {
+      return Promise.reject(this.#failure ?? new Error("Sharkd is stopped"));
+    }
+    // Concurrent callers share the handshake; a failed session must not
+    // silently restart without its loaded capture.
+    this.#starting ??= this.#start();
+    return this.#starting;
   }
 
-  async getClient(): Promise<SharkdClient> {
-    if (this.#client && this.#process?.exitCode == null) {
-      return this.#client;
-    }
-
-    return new Promise((resolve, reject) => {
-      this.#process = spawn(this.#sharkdPath, [
-        "--config-profile",
-        this.#profile,
-        "--foreground",
-      ]);
-
-      this.#process.on("error", (err) => {
-        reject(new Error(`Failed to start sharkd: ${err.message}`));
-      });
-
-      this.#process.on("exit", (code) => {
-        reject(new Error(`Sharkd exited unexpectedly with exit code: ${code}`));
-      });
-
-      this.#client = new JSONRPCClient((request: JSONRPCRequest) => {
-        const message = `${JSON.stringify(request)}\n`;
-        if (this.#process?.stdin) {
-          outputChannel.appendLine(`${this.#process.pid}: ${message}`);
-          this.#process.stdin.write(message);
-        }
-      });
-
-      this.#process.stdout?.on("data", (data) => {
-        this.#buffer += data.toString();
-
-        const lines = this.#buffer.split("\n");
-        this.#buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (line.trim()) {
-            const response = JSON.parse(line);
-            this.#client?.receive(response);
+  async #start(): Promise<SharkdClient> {
+    const child = (this.options.spawn ?? spawn)(
+      this.sharkdPath,
+      ["--config-profile", this.profile, "--foreground"],
+      { windowsHide: true, stdio: "pipe" },
+    );
+    this.#process = child;
+    const client: SharkdClient = new JSONRPCClient(
+      (request: JSONRPCRequest) => {
+        return new Promise<void>((resolve, reject) => {
+          if (this.#failure || this.#stopped || !child.stdin?.writable) {
+            reject(this.#failure ?? new Error("Sharkd is not running"));
+            return;
           }
-        }
-      });
-
-      const timeout = setTimeout(() => {
-        this.#process?.kill();
-        return reject(new Error("Failed to start sharkd: timeout"));
-      }, 5000);
-
-      const interval = setInterval(async () => {
-        try {
-          if (!this.#client) {
-            return reject(new Error("Error creating sharkd client"));
-          }
-
-          await this.#client.request("status");
-
-          clearTimeout(timeout);
-          clearInterval(interval);
-          return resolve(this.#client);
-        } catch {
-          // Not ready yet... retry
-        }
-      });
+          child.stdin.write(`${JSON.stringify(request)}\n`, (error) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve();
+            }
+          });
+        });
+      },
+    );
+    this.#client = client;
+    let buffer = "";
+    let stderr = "";
+    const decoder = new StringDecoder("utf8");
+    const fail = (error: Error) => {
+      this.#failure ??= error;
+      client.rejectAllPendingRequests(this.#failure.message);
+      child.kill();
+    };
+    child.on("error", (error) =>
+      fail(new Error(`Failed to start sharkd: ${error.message}`)),
+    );
+    child.stdin?.on("error", fail);
+    child.stdout?.on("error", fail);
+    child.stderr?.on("error", fail);
+    child.stderr?.on("data", (data: Buffer) => {
+      stderr = (stderr + data.toString()).slice(-4096);
+      this.options.log?.(data.toString().trimEnd());
     });
+    // close follows final stdout data, unlike exit (important for bye).
+    child.on("close", (code, signal) => {
+      fail(
+        new Error(
+          `Sharkd exited (${signal ?? code})${stderr.trim() ? `: ${stderr.trim()}` : ""}`,
+        ),
+      );
+    });
+    child.stdout?.on("data", (data: Buffer) => {
+      buffer += decoder.write(data);
+      let end = buffer.indexOf("\n");
+      while (end !== -1) {
+        const line = buffer.slice(0, end).trim();
+        buffer = buffer.slice(end + 1);
+        if (line) {
+          try {
+            client.receive(JSON.parse(line));
+          } catch {
+            fail(new Error("Invalid JSON received from sharkd"));
+            return;
+          }
+        }
+        end = buffer.indexOf("\n");
+      }
+    });
+    const timeout = setTimeout(
+      () => fail(new Error("Failed to start sharkd: timeout")),
+      this.options.startupTimeout ?? 5000,
+    );
+    try {
+      // stdin queues until spawn; one status request is sufficient.
+      await client.request("status");
+      if (this.#failure || this.#stopped) {
+        throw this.#failure ?? new Error("Sharkd is stopped");
+      }
+      return client;
+    } catch (error) {
+      fail(error instanceof Error ? error : new Error(String(error)));
+      throw this.#failure;
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   stop() {
+    if (this.#stopped) {
+      return;
+    }
+    this.#stopped = true;
+    this.#client?.rejectAllPendingRequests("Sharkd is stopped");
     this.#process?.kill();
   }
 }
-
-export { Sharkd, type SharkdClient };
+export type { SharkdClient };

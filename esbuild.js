@@ -1,71 +1,42 @@
 const esbuild = require("esbuild");
-
-const production = process.argv.includes('--production');
-const watch = process.argv.includes('--watch');
-
-const esbuildProblemMatcherPlugin = {
-    name: 'esbuild-problem-matcher',
-    setup(build) {
-        build.onStart(() => console.log(`[watch] build started`));
-        build.onEnd((result) => {
-            result.errors.forEach(({ text, location }) => {
-                console.error(`✘ [ERROR] ${text} (${location.file}:${location.line})`);
-            });
-            console.log(`[watch] build finished`);
-        });
-    },
-};
+const production = process.argv.includes("--production");
+const watch = process.argv.includes("--watch");
+let pending = 0;
+const webviews = ["frameList", "frameHex", "frameTreeWelcome"];
+const initial = new Set(["extension", ...webviews.map((name) => name.toLowerCase())]);
+const matcher = (name) => ({
+  name: "build-progress",
+  setup(build) {
+    build.onStart(() => {
+      if (pending++ === 0) { console.log("[watch] build started"); }
+    });
+    build.onEnd((result) => {
+      for (const { text, location } of result.errors) {
+        console.error(location ? `${location.file}:${location.line}:${location.column}: error: ${text}` : `error: ${text}`);
+      }
+      initial.delete(name);
+      if (--pending === 0 && initial.size === 0) { console.log("[watch] build finished"); }
+    });
+  },
+});
 
 async function main() {
-    const extensionCtx = await esbuild.context({
-        entryPoints: ['src/extension.ts'],
-        bundle: true,
-        format: 'cjs',
-        minify: production,
-        sourcemap: !production,
-        platform: 'node',
-        outfile: 'dist/extension.js',
-        external: ['vscode'],
-        plugins: [esbuildProblemMatcherPlugin],
-        tsconfig: './tsconfig.json',
-    });
-
-    const frameListCtx = await esbuild.context({
-        entryPoints: ['src/webview/frameList.tsx'],
-        bundle: true,
-        format: 'esm',
-        minify: production,
-        sourcemap: !production,
-        platform: 'browser',
-        outfile: 'dist/framelist.js',
-        define: { 'process.env.NODE_ENV': production ? '"production"' : '"development"' },
-        loader: { '.tsx': 'tsx', '.ts': 'ts' },
-        plugins: [esbuildProblemMatcherPlugin],
-        tsconfig: './src/webview/tsconfig.json',
-    });
-
-    const frameHexCtx = await esbuild.context({
-        entryPoints: ['src/webview/frameHex.tsx'],
-        bundle: true,
-        format: 'esm',
-        minify: production,
-        sourcemap: !production,
-        platform: 'browser',
-        outfile: 'dist/framehex.js',
-        define: { 'process.env.NODE_ENV': production ? '"production"' : '"development"' },
-        loader: { '.tsx': 'tsx', '.ts': 'ts' },
-        plugins: [esbuildProblemMatcherPlugin],
-        tsconfig: './src/webview/tsconfig.json',
-    });
-
-    if (watch) {
-        await Promise.all([extensionCtx.watch(), frameListCtx.watch(), frameHexCtx.watch()]);
-    } else {
-        await Promise.all([extensionCtx.rebuild(), frameListCtx.rebuild(), frameHexCtx.rebuild()]);
-        await extensionCtx.dispose();
-        await frameListCtx.dispose();
-        await frameHexCtx.dispose();
-    }
+  const common = { bundle: true, minify: production, sourcemap: !production, logLevel: "silent" };
+  const contexts = await Promise.all([
+    esbuild.context({ ...common, entryPoints: ["src/extension.ts"], format: "cjs", platform: "node", target: "node22",
+      outfile: "dist/extension.js", external: ["vscode"], tsconfig: "tsconfig.json", plugins: [matcher("extension")] }),
+    ...webviews.map((name) => esbuild.context({
+      ...common, entryPoints: [`src/webview/${name}.tsx`], format: "iife", platform: "browser", target: "chrome138",
+      outfile: `dist/${name.toLowerCase()}.js`, tsconfig: "src/webview/tsconfig.json",
+      define: { "process.env.NODE_ENV": JSON.stringify(production ? "production" : "development") },
+      plugins: [matcher(name.toLowerCase())],
+    })),
+  ]);
+  if (watch) {
+    await Promise.all(contexts.map((context) => context.watch()));
+  } else {
+    try { await Promise.all(contexts.map((context) => context.rebuild())); }
+    finally { await Promise.all(contexts.map((context) => context.dispose())); }
+  }
 }
-
-main().catch(e => { console.error(e); process.exit(1); });
+main().catch((error) => { console.error(error); process.exitCode = 1; });

@@ -1,107 +1,82 @@
-import _, { isEqual } from "lodash";
 import * as vscode from "vscode";
 import type { ByteRange, TreeNode } from "./types/sharkd";
 
 export class FrameTreeItem extends vscode.TreeItem {
-  parent?: FrameTreeItem;
-  children: TreeNode[];
-  node: TreeNode;
-
-  constructor(node: TreeNode, index: number, parent?: FrameTreeItem) {
+  readonly children: FrameTreeItem[];
+  constructor(
+    readonly node: TreeNode,
+    index: number,
+    readonly parent?: FrameTreeItem,
+  ) {
     super(
       node.g ? `[${node.l}]` : node.l,
-      node.n
+      node.n?.length
         ? vscode.TreeItemCollapsibleState.Collapsed
         : vscode.TreeItemCollapsibleState.None,
     );
-    this.id = `${parent?.id || "root"}-${node.e}-${index}`;
-    this.parent = parent;
-    this.children = node.n;
-    this.node = node;
-
-    const iconMap: Record<string, { icon: string; color: string }> = {
-      chat: { icon: "comment-discussion", color: "terminal.ansiBlue" },
-      note: { icon: "note", color: "terminal.ansiCyan" },
-      warning: { icon: "warning", color: "terminal.ansiYellow" },
-      error: { icon: "error", color: "terminal.ansiRed" },
+    this.id = `${parent?.id ?? "root"}-${index}`;
+    this.contextValue =
+      node.f && node.f !== "text" ? "crumbsFilterable" : undefined;
+    this.children = (node.n ?? []).map(
+      (child, childIndex) => new FrameTreeItem(child, childIndex, this),
+    );
+    const icons: Record<string, [string, string]> = {
+      chat: ["comment-discussion", "terminal.ansiBlue"],
+      note: ["note", "terminal.ansiCyan"],
+      warning: ["warning", "terminal.ansiYellow"],
+      error: ["error", "terminal.ansiRed"],
     };
-
-    const iconConfig = node.s ? iconMap[node.s.toLowerCase()] : undefined;
-    if (iconConfig) {
+    const icon = node.s ? icons[node.s.toLowerCase()] : undefined;
+    if (icon) {
       this.iconPath = new vscode.ThemeIcon(
-        iconConfig.icon,
-        new vscode.ThemeColor(iconConfig.color),
+        icon[0],
+        new vscode.ThemeColor(icon[1]),
       );
     }
   }
 }
 
 export class FrameTreeDataProvider
-  implements vscode.TreeDataProvider<FrameTreeItem>
+  implements vscode.TreeDataProvider<FrameTreeItem>, vscode.Disposable
 {
-  #rootTreeItems: FrameTreeItem[] = [];
-  #onDidChangeTreeData: vscode.EventEmitter<void> =
-    new vscode.EventEmitter<void>();
-
-  readonly onDidChangeTreeData = this.#onDidChangeTreeData.event;
+  #roots: FrameTreeItem[] = [];
+  #ranges = new Map<string, FrameTreeItem>();
+  #items = new Set<FrameTreeItem>();
+  #changed = new vscode.EventEmitter<void>();
+  readonly onDidChangeTreeData = this.#changed.event;
 
   setRootNodes(nodes: TreeNode[]) {
-    const treeItems = nodes.map(
-      (node, index) => new FrameTreeItem(node, index),
-    );
-
-    if (_.isEqual(treeItems, this.#rootTreeItems)) {
-      return;
-    }
-
-    this.#rootTreeItems = treeItems;
-    this.#onDidChangeTreeData.fire();
+    this.#roots = nodes.map((node, index) => new FrameTreeItem(node, index));
+    this.#ranges.clear();
+    this.#items.clear();
+    const index = (item: FrameTreeItem) => {
+      this.#items.add(item);
+      const range = item.node.h;
+      if (range && range[1] > 0 && !item.node.g && !item.node.ds) {
+        this.#ranges.set(range.join(":"), item);
+      }
+      item.children.forEach(index);
+    };
+    this.#roots.forEach(index);
+    this.#changed.fire();
   }
 
-  getTreeItem(element: FrameTreeItem): vscode.TreeItem {
+  getTreeItem(element: FrameTreeItem) {
     return element;
   }
-
-  getChildren(element?: FrameTreeItem | undefined): FrameTreeItem[] {
-    if (element) {
-      return !element.children
-        ? []
-        : element.children.map(
-            (node, index) => new FrameTreeItem(node, index, element),
-          );
-    }
-
-    return this.#rootTreeItems;
+  hasItem(item: FrameTreeItem) {
+    return this.#items.has(item);
   }
-
-  getParent?(element: FrameTreeItem): FrameTreeItem | undefined {
+  getChildren(element?: FrameTreeItem) {
+    return element ? element.children : this.#roots;
+  }
+  getParent(element: FrameTreeItem) {
     return element.parent;
   }
-
-  resolveTreeItem?(
-    item: vscode.TreeItem,
-    _element: FrameTreeItem,
-    _token: vscode.CancellationToken,
-  ): vscode.ProviderResult<vscode.TreeItem> {
-    return item;
+  getTreeItemAtRange(range: ByteRange) {
+    return this.#ranges.get(range.join(":"));
   }
-
-  getTreeItemAtRange(range: ByteRange): FrameTreeItem | undefined {
-    let item: FrameTreeItem | undefined;
-
-    const findItem = (currentItem: FrameTreeItem) => {
-      if (isEqual(currentItem.node.h, range) && !currentItem.node.g) {
-        item = currentItem;
-      } else {
-        this.getChildren(currentItem).forEach((childItem) => {
-          findItem(childItem);
-        });
-      }
-    };
-    this.#rootTreeItems.forEach((currentItem) => {
-      findItem(currentItem);
-    });
-
-    return item;
+  dispose() {
+    this.#changed.dispose();
   }
 }
