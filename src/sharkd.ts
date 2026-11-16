@@ -30,7 +30,7 @@ export class Sharkd {
   #pending = new Map<JSONRPCRequest["id"], { method: string; start: number }>();
 
   constructor(
-    private readonly profile = "Default",
+    private readonly profile = "",
     private readonly sharkdPath = "sharkd",
     private readonly options: SharkdOptions = {},
   ) {}
@@ -149,8 +149,10 @@ export class Sharkd {
       `Starting session: capture=${JSON.stringify(this.options.capturePath)} profile=${JSON.stringify(this.profile)}`,
     );
     this.#probeVersion();
+    // Older versions require "-" for the default console session. Named
+    // profiles select console mode via -C; neither needs --foreground.
     const child = this.#spawn(
-      ["--config-profile", this.profile, "--foreground"],
+      this.profile ? ["--config-profile", this.profile] : ["-"],
       "reader",
     );
     this.#process = child;
@@ -186,6 +188,8 @@ export class Sharkd {
     this.#client = client;
     let buffer = "";
     let stderr = "";
+    let invalidResponse = false;
+    const closed = new Promise<void>((resolve) => child.once("close", resolve));
     const logBuffer = () => {
       if (buffer) {
         this.#log(`reader stdout (unprocessed):\n${buffer}`);
@@ -245,6 +249,7 @@ export class Sharkd {
         client.receive(response);
       } catch (error) {
         this.#log(`reader stdout (invalid response, full):\n${line}`);
+        invalidResponse = true;
         fail(new Error("Invalid JSON received from sharkd", { cause: error }));
       }
     };
@@ -294,6 +299,27 @@ export class Sharkd {
       return client;
     } catch (error) {
       fail(error instanceof Error ? error : new Error(String(error)));
+      if (invalidResponse && !this.#stopped) {
+        // Startup diagnostics may arrive on stderr after malformed stdout.
+        // Drain the killed process, but do not hang if it never closes.
+        let drainTimeout: ReturnType<typeof setTimeout> | undefined;
+        try {
+          await Promise.race([
+            closed,
+            new Promise<void>((resolve) => {
+              drainTimeout = setTimeout(resolve, 100);
+            }),
+          ]);
+        } finally {
+          clearTimeout(drainTimeout);
+        }
+        if (stderr.trim() && this.#failure) {
+          this.#failure = new Error(
+            `${this.#failure.message}: ${stderr.trim()}`,
+            { cause: this.#failure },
+          );
+        }
+      }
       throw this.#failure ?? error;
     } finally {
       clearTimeout(timeout);

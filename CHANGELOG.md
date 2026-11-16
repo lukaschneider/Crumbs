@@ -33,6 +33,8 @@ Display filters are back, this time right above the packet list 😎. The rewrit
 
 ### Fixed
 
+- Sharkd startup on older versions such as 3.6.2 by using explicit console mode for the default configuration and removing the unsupported `--foreground` option.
+- Opening captures on installations without named Wireshark profiles. The profile setting now defaults to empty; startup errors retain profile diagnostics and explain how to use the default configuration.
 - Opening captures with sharkd versions that reject a zero skip value on the first page.
 - Windows capture paths and duplicate initialization when opening the same capture in split editors.
 - Sharkd startup and cleanup: share the startup handshake, reject pending requests on process failures, and close sessions when they are no longer needed.

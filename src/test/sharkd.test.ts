@@ -11,7 +11,7 @@ export function sharkdPath() {
 }
 
 export async function testSharkd(file: string) {
-  const sharkd = new Sharkd("Default", sharkdPath());
+  const sharkd = new Sharkd(undefined, sharkdPath());
   try {
     const [client, second] = await Promise.all([
       sharkd.getClient(),

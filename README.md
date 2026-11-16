@@ -53,7 +53,7 @@ Open Settings and search for **Crumbs**.
 | Setting | What it controls |
 | --- | --- |
 | `crumbs.sharkd` | Automatic discovery, or a custom executable path. |
-| `crumbs.profile` | Wireshark profile; defaults to `Default`. |
+| `crumbs.profile` | Optional Wireshark profile name; leave empty (the default) to use the default configuration. |
 | `crumbs.frameList.columns` | Column names and Wireshark formats or display fields. |
 | `crumbs.frameList.colorCoding` | Wireshark packet coloring; selections use VS Code theme colors. |
 | `crumbs.frameHex.enableRowWrap` | Wrap ASCII below hex when space is limited. |
@@ -62,7 +62,7 @@ Open Settings and search for **Crumbs**.
 
 Hex settings take effect immediately. Reopen a capture after changing its columns, packet colors, profile, or executable.
 
-**Trouble opening a capture?** The error page offers relevant hints, **Open settings**, and **Show log**. Check that `sharkd` is installed and that the selected Wireshark profile exists, then choose **Try again**.
+**Trouble opening a capture?** The error page offers relevant hints, **Open settings**, and **Show log**. Check that `sharkd` is installed and that any selected Wireshark profile exists, then choose **Try again**. No named profile is required: leave `crumbs.profile` empty to use the default configuration. If you previously saved `Default` as the setting value and it cannot be found, clear the value.
 
 The **Crumbs (sharkd)** output channel includes sharkd version/build output, extension and host versions, capture/profile context, executable arguments, JSON-RPC requests and timings, process exit details, and complete error output. Successful packet responses are summarized by size. When reporting an issue, copy the log from session startup through the failure; it includes local file paths and display filters.
 

@@ -2,7 +2,7 @@
   "name": "crumbs",
   "displayName": "Crumbs",
   "description": "Explore packet captures in VS Code with Wireshark display filters, protocol trees, and synchronized hex inspection.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "publisher": "lukaschneider",
   "author": "Lukas Schneider",
   "license": "MIT",
@@ -104,8 +104,8 @@
           },
           "crumbs.profile": {
             "type": "string",
-            "default": "Default",
-            "description": "The wireshark profile to use.",
+            "default": "",
+            "description": "Wireshark configuration profile to use. Leave empty to use the default profile.",
             "scope": "machine"
           },
           "crumbs.frameList.columns": {

@@ -29,7 +29,7 @@ export function describeCaptureError(error: unknown): CaptureError {
       icon: "settings",
       title: "Wireshark profile unavailable",
       description: "The configured profile could not be opened.",
-      hint: "Choose an existing Wireshark profile, or switch back to Default, then try again.",
+      hint: "Choose an existing Wireshark profile, or clear the profile setting to use the default configuration, then try again.",
       details,
       setting: "profile",
     };

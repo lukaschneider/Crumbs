@@ -4,7 +4,7 @@ import { PassThrough, Writable } from "node:stream";
 import type { spawn } from "node:child_process";
 import { Sharkd } from "../src/sharkd";
 
-function transport(timeout = 1000, diagnostics = false) {
+function transport(timeout = 1000, diagnostics = false, profile?: string) {
   const requests: { id: number; method: string }[] = [];
   const child = Object.assign(new EventEmitter(), {
     stdout: new PassThrough(),
@@ -26,7 +26,7 @@ function transport(timeout = 1000, diagnostics = false) {
   const spawnMock = vi.fn((_path: string, args: string[]) =>
     args.includes("--version") ? versionChild : child,
   );
-  const sharkd = new Sharkd("Default", "sharkd", {
+  const sharkd = new Sharkd(profile, "sharkd", {
     spawn: spawnMock as unknown as typeof spawn,
     startupTimeout: timeout,
     log: diagnostics ? log : undefined,
@@ -39,6 +39,39 @@ function transport(timeout = 1000, diagnostics = false) {
 
 afterEach(() => vi.useRealTimers());
 describe("sharkd transport", () => {
+  it.each([undefined, ""])(
+    "starts without a named profile for %s",
+    async (profile) => {
+      const { sharkd, requests, spawnMock, respond } = transport(
+        1000,
+        false,
+        profile,
+      );
+      const ready = sharkd.getClient();
+      expect(spawnMock.mock.calls[0][1]).toEqual(["-"]);
+      respond(requests[0].id, { frames: 0 });
+      await ready;
+      sharkd.stop();
+    },
+  );
+  it.each(["Default", "My Analysis"])(
+    "preserves the explicit profile %s",
+    async (profile) => {
+      const { sharkd, requests, spawnMock, respond } = transport(
+        1000,
+        false,
+        profile,
+      );
+      const ready = sharkd.getClient();
+      expect(spawnMock.mock.calls[0][1]).toEqual([
+        "--config-profile",
+        profile,
+      ]);
+      respond(requests[0].id, { frames: 0 });
+      await ready;
+      sharkd.stop();
+    },
+  );
   it("shares one startup and sends exactly one readiness request", async () => {
     const { sharkd, requests, spawnMock, respond } = transport();
     const first = sharkd.getClient();
@@ -139,10 +172,12 @@ describe("sharkd diagnostics", () => {
     const { sharkd, child, versionChild, log, spawnMock } = transport(
       1000,
       true,
+      "Default",
     );
     const ready = expect(sharkd.getClient()).rejects.toThrow("Invalid JSON");
     child.stderr.write('Configuration Profile "Default" does not exist\n');
     child.stdout.write("cannot initialize profile\n");
+    child.emit("close", 1, null);
     await ready;
     versionChild.stdout.write(
       "Sharkd (Wireshark) 4.6.0\nCompiled with test libraries\n",
@@ -151,7 +186,7 @@ describe("sharkd diagnostics", () => {
     const output = log.mock.calls.map(([message]) => message).join("\n");
     expect(spawnMock.mock.calls.map(([, args]) => args)).toEqual([
       ["--version"],
-      ["--config-profile", "Default", "--foreground"],
+      ["--config-profile", "Default"],
     ]);
     expect(output).toContain("/captures/test file.pcapng");
     expect(output).toContain('Configuration Profile "Default" does not exist');
@@ -160,6 +195,42 @@ describe("sharkd diagnostics", () => {
       "Sharkd (Wireshark) 4.6.0\nCompiled with test libraries",
     );
     expect(output).toMatch(/version closed: code=0 signal=none \(\d+\.\d ms\)/);
+    sharkd.stop();
+  });
+
+  it.each(["stderr first", "stdout first"])(
+    "retains missing-profile diagnostics with %s",
+    async (order) => {
+      vi.useFakeTimers();
+      const { sharkd, child, spawnMock } = transport(1000, false, "missing");
+      const diagnostic = 'Configuration Profile "missing" does not exist';
+      const ready = expect(sharkd.getClient()).rejects.toThrow(diagnostic);
+      if (order === "stderr first") {
+        child.stderr.write(`${diagnostic}\n`);
+      }
+      child.stdout.write("cannot initialize sharkd\n");
+      await vi.advanceTimersByTimeAsync(1);
+      if (order === "stdout first") {
+        child.stderr.write(`${diagnostic}\n`);
+      }
+      child.emit("close", 1, null);
+      await ready;
+      await expect(sharkd.getClient()).rejects.toThrow(diagnostic);
+      expect(spawnMock).toHaveBeenCalledOnce();
+      expect(vi.getTimerCount()).toBe(0);
+      sharkd.stop();
+    },
+  );
+
+  it("bounds the diagnostic wait when malformed startup never closes", async () => {
+    vi.useFakeTimers();
+    const { sharkd, child } = transport();
+    const ready = expect(sharkd.getClient()).rejects.toThrow("Invalid JSON");
+    child.stdout.write("not json\n");
+    await vi.advanceTimersByTimeAsync(100);
+    await ready;
+    expect(child.kill).toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(0);
     sharkd.stop();
   });
 
