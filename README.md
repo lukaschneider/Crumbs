@@ -64,6 +64,8 @@ Hex settings take effect immediately. Reopen a capture after changing its column
 
 **Trouble opening a capture?** The error page offers relevant hints, **Open settings**, and **Show log**. Check that `sharkd` is installed and that the selected Wireshark profile exists, then choose **Try again**.
 
+The **Crumbs (sharkd)** output channel includes sharkd version/build output, extension and host versions, capture/profile context, executable arguments, JSON-RPC requests and timings, process exit details, and complete error output. Successful packet responses are summarized by size. When reporting an issue, copy the log from session startup through the failure; it includes local file paths and display filters.
+
 ## Development
 
 Use Node.js **22.22.2+ or 24.15+** and npm:

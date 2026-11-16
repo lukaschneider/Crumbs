@@ -1,3 +1,4 @@
+import { inspect } from "node:util";
 import * as vscode from "vscode";
 import { Sharkd, type SharkdClient } from "./sharkd";
 import { resolveSharkdPath } from "./sharkdPath";
@@ -53,7 +54,7 @@ export default class PcapDocument implements vscode.CustomDocument {
 
   reportError(error: unknown) {
     this.log?.(
-      `${this.uri.fsPath}: ${error instanceof Error ? error.message : String(error)}`,
+      `[${new Date().toISOString()}] ${this.uri.fsPath}: ${inspect(error, { depth: null, maxStringLength: null, maxArrayLength: null })}`,
     );
   }
 
@@ -62,7 +63,7 @@ export default class PcapDocument implements vscode.CustomDocument {
     return new Sharkd(
       config.get("profile"),
       resolveSharkdPath(config.get<string>("sharkd")),
-      { log: this.log },
+      { log: this.log, capturePath: this.uri.fsPath },
     );
   }
 
