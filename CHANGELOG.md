@@ -49,6 +49,7 @@ Display filters are back, this time right above the packet list 😎. The rewrit
 - The Tree welcome screen not matching the Hex welcome screen.
 - F5 debugging now builds reliably without an extra task-matcher extension, with source maps and type checks for extension and webview code.
 - Keep selected item visible on keyboard navigation.
+- Vim style navigation also in column headers.
 
 ## [1.0.0]
 

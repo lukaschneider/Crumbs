@@ -370,7 +370,9 @@ export function FrameListView({ rpc }: { rpc: Rpc }) {
                   event.shiftKey ||
                   event.nativeEvent.isComposing ||
                   !(event.target instanceof HTMLElement) ||
-                  !event.target.matches('[role="gridcell"]')
+                  !event.target.matches(
+                    '[role="gridcell"], [role="columnheader"]',
+                  )
                 ) {
                   return;
                 }

@@ -339,6 +339,33 @@ test("packet grid supports hjkl navigation and Enter reveals the focused packet"
     .toEqual(enterFocus);
 });
 
+test("packet grid supports hjkl navigation through column headers", async ({
+  page,
+}) => {
+  await page.goto("/list");
+  const cell = (column: number) =>
+    page.locator(`[row-index="0"] [role="gridcell"][col-id="${column}"]`);
+  const header = (column: number) =>
+    page.locator(`[role="columnheader"][col-id="${column}"]`);
+  await cell(0).click();
+  await page.keyboard.press("k");
+  await expect(header(0)).toBeFocused();
+  await page.keyboard.press("l");
+  await expect(header(1)).toBeFocused();
+  await page.keyboard.press("h");
+  await expect(header(0)).toBeFocused();
+  await page.keyboard.press("k");
+  await expect(header(0)).toBeFocused();
+  await page.keyboard.press("j");
+  await expect(cell(0)).toBeFocused();
+  await page.keyboard.press("ArrowUp");
+  await expect(header(0)).toBeFocused();
+  await page.keyboard.press("l");
+  await expect(header(1)).toBeFocused();
+  await page.keyboard.press("j");
+  await expect(cell(1)).toBeFocused();
+});
+
 // Read rendered pixels, not just background-color: gradients and AG Grid's
 // pseudo-elements can change the final result, especially with translucent themes.
 async function rowAppearance(row: Locator) {
