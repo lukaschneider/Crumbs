@@ -67,6 +67,12 @@ const rowSelection = {
   headerCheckbox: false,
   enableClickSelection: true,
 } as const;
+const navigationKeys: Record<string, string> = {
+  h: "ArrowLeft",
+  j: "ArrowDown",
+  k: "ArrowUp",
+  l: "ArrowRight",
+};
 const getRowStyle = ({ data }: RowClassParams<GridRow>) => ({
   // Let CSS choose a complete foreground/background pair for each row state.
   // Reset absent values as AG Grid can reuse rows when loading another page.
@@ -354,6 +360,33 @@ export function FrameListView({ rpc }: { rpc: Rpc }) {
             )}
             <div
               className="frame-list-grid"
+              onKeyDownCapture={(event) => {
+                const key = navigationKeys[event.key];
+                if (
+                  !key ||
+                  event.altKey ||
+                  event.ctrlKey ||
+                  event.metaKey ||
+                  event.shiftKey ||
+                  event.nativeEvent.isComposing ||
+                  !(event.target instanceof HTMLElement) ||
+                  !event.target.matches('[role="gridcell"]')
+                ) {
+                  return;
+                }
+                event.preventDefault();
+                event.stopPropagation();
+                // Reuse grid navigation, including scrolling and virtual rows.
+                event.target.dispatchEvent(
+                  new KeyboardEvent("keydown", {
+                    key,
+                    code: key,
+                    bubbles: true,
+                    cancelable: true,
+                    repeat: event.repeat,
+                  }),
+                );
+              }}
               style={{
                 height: "100%",
                 visibility: ready ? "visible" : "hidden",
@@ -371,6 +404,13 @@ export function FrameListView({ rpc }: { rpc: Rpc }) {
                 maxConcurrentDatasourceRequests={1}
                 modules={modules}
                 onCellDoubleClicked={(event) => focus(event.data?.id, true)}
+                onCellKeyDown={(event) => {
+                  const keyEvent = event.event as KeyboardEvent | undefined;
+                  if (keyEvent?.key === "Enter" && !keyEvent.isComposing) {
+                    keyEvent.preventDefault();
+                    focus(event.data?.id, true);
+                  }
+                }}
                 onCellFocused={(event) => {
                   if (event.rowIndex !== null && !event.rowPinned) {
                     focus(

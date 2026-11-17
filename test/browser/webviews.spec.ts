@@ -6,6 +6,7 @@ declare global {
       method: string;
       params?: {
         frameId?: number;
+        reveal?: boolean;
         setting?: string;
         filter?: string;
         text?: string;
@@ -264,6 +265,67 @@ test("packet grid preserves values and focuses actual frame IDs under the webvie
     )
     .toBeGreaterThan(1);
   expect(errors).toEqual([]);
+});
+
+test("packet grid supports hjkl navigation and Enter reveals the focused packet", async ({
+  page,
+}) => {
+  await page.goto("/list");
+  const cell = (row: number, column: number) =>
+    page.locator(`[row-index="${row}"] [role="gridcell"][col-id="${column}"]`);
+  await cell(0, 0).click();
+  await page.keyboard.press("j");
+  await expect(cell(1, 0)).toBeFocused();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          window.crumbsMessages
+            .filter((message) => message.method === "focus")
+            .at(-1)?.params,
+      ),
+    )
+    .toMatchObject({ frameId: 11, reveal: false });
+  await page.keyboard.press("j");
+  await expect(cell(1, 0)).toBeFocused();
+  await page.keyboard.press("l");
+  await expect(cell(1, 1)).toBeFocused();
+  await page.keyboard.press("h");
+  await expect(cell(1, 0)).toBeFocused();
+  await page.keyboard.press("h");
+  await expect(cell(1, 0)).toBeFocused();
+  await page.keyboard.press("k");
+  await expect(cell(0, 0)).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await expect(cell(1, 0)).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          window.crumbsMessages
+            .filter((message) => message.method === "focus")
+            .at(-1)?.params,
+      ),
+    )
+    .toMatchObject({ frameId: 11, reveal: true });
+  const enterFocus = await page.evaluate(
+    () =>
+      window.crumbsMessages
+        .filter((message) => message.method === "focus")
+        .at(-1)?.params,
+  );
+  await cell(1, 0).dblclick();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          window.crumbsMessages
+            .filter((message) => message.method === "focus")
+            .at(-1)?.params,
+      ),
+    )
+    .toEqual(enterFocus);
 });
 
 // Read rendered pixels, not just background-color: gradients and AG Grid's

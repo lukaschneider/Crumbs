@@ -18,7 +18,8 @@ Display filters are back, this time right above the packet list 😎. The rewrit
 - A short feature GIF and a still screenshot for the README, with scripts to regenerate the capture and recording.
 - MIT license and Marketplace metadata.
 - Unit, component, and browser regression tests, plus integration tests using real VS Code and sharkd.
-- Improved output log to better be able to debug issues
+- Improved output log to better be able to debug issues.
+- Add vim navigation keybindings (h/j/k/l) for navigating the frame list.
 
 ### Changed
 

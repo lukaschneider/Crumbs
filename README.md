@@ -19,7 +19,7 @@ Explore packet captures in VS Code with Wireshark's protocol dissection, familia
 
 1. Install **VS Code 1.108.1 or later** and [Wireshark](https://www.wireshark.org/download.html), including its `sharkd` executable.
 2. Install **Crumbs**, then open a packet capture. If another editor opens it, right-click its tab and choose **Reopen Editor With… → Frame List**.
-3. Double-click a packet to open **Frame Explorer**. Explore its protocol tree and select a field to see the corresponding bytes.
+3. Double-click a packet or press **Enter** on a focused row to open **Frame Explorer**. Navigate the packet list with the arrow keys or **h/j/k/l** (left/down/up/right). Explore its protocol tree and select a field to see the corresponding bytes.
 
 Standard Windows Wireshark installations are detected automatically. On macOS and Linux, `sharkd` should be on your PATH. For a custom installation, set **Crumbs: Sharkd** to the executable's full path. When using WSL, SSH, or a development container, install Wireshark on the machine running the extension host.
 
