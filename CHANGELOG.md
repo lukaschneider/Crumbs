@@ -2,7 +2,7 @@
 
 All notable changes to Crumbs will be documented here.
 
-## [Unreleased]
+## [1.3.2] - 2026-11-17
 
 Display filters are back, this time right above the packet list 😎. The rewrite also gets some much-needed polish for the Tree and Hex views, better Windows support, and a refreshed look.
 
