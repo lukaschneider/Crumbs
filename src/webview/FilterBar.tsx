@@ -84,6 +84,7 @@ export function FilterBar({
   const [option, setOption] = useState(0);
   const root = useRef<HTMLFieldSetElement>(null);
   const input = useRef<HTMLInputElement>(null);
+  const suggestionList = useRef<HTMLDivElement>(null);
   const pendingCaret = useRef<number | null>(null);
   const applying = useRef(0);
   const listId = useId();
@@ -356,15 +357,17 @@ export function FilterBar({
               if (event.key === "ArrowDown" || event.key === "ArrowUp") {
                 event.preventDefault();
                 setPopup("suggestions");
-                setOption((index) =>
-                  Math.max(
-                    0,
-                    Math.min(
-                      (completions?.items.length ?? 1) - 1,
-                      index + (event.key === "ArrowDown" ? 1 : -1),
-                    ),
+                const next = Math.max(
+                  0,
+                  Math.min(
+                    (completions?.items.length ?? 1) - 1,
+                    option + (event.key === "ArrowDown" ? 1 : -1),
                   ),
                 );
+                setOption(next);
+                suggestionList.current?.children[next]?.scrollIntoView({
+                  block: "nearest",
+                });
               }
             }}
           />
@@ -447,6 +450,7 @@ export function FilterBar({
           </div>
           <div
             className="filter-popup-list"
+            ref={suggestionList}
             id={listId}
             role="listbox"
             aria-label="Filter suggestions"

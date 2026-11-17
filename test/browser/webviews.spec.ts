@@ -199,6 +199,17 @@ test.beforeEach(async ({ page }) => {
                     },
                   ],
           };
+          if (scenario === "autocomplete-scroll" && !text) {
+            result = {
+              from: 0,
+              to: 0,
+              items: Array.from({ length: 30 }, (_, index) => ({
+                text: `protocol${index}`,
+                description: "Protocol in this capture",
+                kind: "protocol",
+              })),
+            };
+          }
         } else if (message.method === "applyFilter") {
           applied = message.params?.filter?.trim() ?? "";
           revision++;
@@ -1062,6 +1073,114 @@ test("filter history is editable and Prepare keeps the current results until App
       page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
     )
     .toBe(true);
+});
+
+test("autocomplete keeps the selected row visible during keyboard navigation", async ({
+  page,
+}) => {
+  await page.goto("/list?scenario=autocomplete-scroll");
+  const input = page.getByRole("combobox", { name: "Display filter" });
+  await input.focus();
+  const list = page.getByRole("listbox", { name: "Filter suggestions" });
+  const options = list.getByRole("option");
+  await expect(options).toHaveCount(30);
+
+  const expectVisibleSelection = async (index: number) => {
+    await expect(options.nth(index)).toHaveAttribute("aria-selected", "true");
+    await expect(input).toBeFocused();
+    await expect
+      .poll(() =>
+        list.evaluate((element, selectedIndex) => {
+          const bounds = element.getBoundingClientRect();
+          const rect = element.children[selectedIndex].getBoundingClientRect();
+          return (
+            rect.top >= bounds.top &&
+            rect.bottom <= bounds.top + element.clientHeight
+          );
+        }, index),
+      )
+      .toBe(true);
+  };
+
+  await expectVisibleSelection(0);
+  for (let index = 1; index < 30; index++) {
+    await input.press("ArrowDown");
+    await expectVisibleSelection(index);
+  }
+  await input.press("ArrowDown");
+  await expectVisibleSelection(29);
+  for (let index = 28; index >= 0; index--) {
+    await input.press("ArrowUp");
+    await expectVisibleSelection(index);
+  }
+  await input.press("ArrowUp");
+  await expectVisibleSelection(0);
+  for (let index = 1; index <= 15; index++) {
+    await input.press("ArrowDown");
+  }
+  await page.setViewportSize({ width: 600, height: 300 });
+  await input.press("ArrowDown");
+  await expectVisibleSelection(16);
+  await input.press("Escape");
+  await input.press("ArrowDown");
+  await expectVisibleSelection(0);
+  await input.fill("tcp.");
+  await expect(options).toHaveCount(2);
+  await expectVisibleSelection(0);
+  await input.press("ArrowDown");
+  await input.press("Tab");
+  await expect(input).toHaveValue("tcp.srcport");
+});
+
+test("hovering edge suggestions does not scroll, and keyboard navigation resumes scrolling", async ({
+  page,
+}) => {
+  await page.goto("/list?scenario=autocomplete-scroll");
+  const input = page.getByRole("combobox", { name: "Display filter" });
+  await input.focus();
+  const list = page.getByRole("listbox", { name: "Filter suggestions" });
+  const options = list.getByRole("option");
+  await expect(options).toHaveCount(30);
+
+  for (const edge of ["top", "bottom"] as const) {
+    await page.mouse.move(0, 0);
+    const target = await list.evaluate((element, side) => {
+      element.scrollTop = 240;
+      const bounds = element.getBoundingClientRect();
+      const y = side === "top" ? bounds.top + 2 : bounds.bottom - 2;
+      const index = Array.from(element.children).findIndex((row) => {
+        const rect = row.getBoundingClientRect();
+        return rect.top <= y && rect.bottom > y;
+      });
+      return { x: bounds.left + 20, y, index, scrollTop: element.scrollTop };
+    }, edge);
+    expect(target.index).toBeGreaterThan(0);
+    await page.mouse.move(target.x, target.y);
+    await expect(options.nth(target.index)).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(await list.evaluate((element) => element.scrollTop)).toBe(
+      target.scrollTop,
+    );
+    await expect(input).toBeFocused();
+
+    await input.press(edge === "top" ? "ArrowUp" : "ArrowDown");
+    const selected = target.index + (edge === "top" ? -1 : 1);
+    await expect(options.nth(selected)).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect
+      .poll(() =>
+        list.evaluate((element, index) => {
+          const bounds = element.getBoundingClientRect();
+          const rect = element.children[index].getBoundingClientRect();
+          return rect.top >= bounds.top && rect.bottom <= bounds.bottom;
+        }, selected),
+      )
+      .toBe(true);
+  }
 });
 
 test("autocomplete chains after logical and comparison operators and keeps suggestion columns aligned", async ({

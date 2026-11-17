@@ -48,6 +48,7 @@ Display filters are back, this time right above the packet list 😎. The rewrit
 - Double borders between adjacent selected packet rows, and selections becoming hard to see when focus moves to another view.
 - The Tree welcome screen not matching the Hex welcome screen.
 - F5 debugging now builds reliably without an extra task-matcher extension, with source maps and type checks for extension and webview code.
+- Keep selected item visible on keyboard navigation.
 
 ## [1.0.0]
 
